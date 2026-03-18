@@ -26,7 +26,7 @@ HR / operations. Sets up the company workspace, manages reward budgets, configur
 ### Features
 
 #### MVP
-- Company workspace setup (admin panel)
+- Company workspace setup (admin panel) — **TESTING**
 - Employee profiles with XP, levels, and achievement badges
 - Achievement engine — define rules tied to work metrics (e.g. "Close 10 deals = Gold Closer badge")
 - Leaderboard — real-time ranking within teams / company
