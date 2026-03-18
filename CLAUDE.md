@@ -1,0 +1,14 @@
+# Motivator Monorepo
+
+## Backend Rules (Go / Fiber)
+
+### Logging & Tracing
+- Every new HTTP handler or endpoint MUST include request tracing via the `requestid` middleware.
+- When adding new routes, always use the `locals:requestid` trace ID in any log output within the handler.
+- Use structured log lines that include: timestamp, status, latency, method, path, IP, trace ID, and error.
+- Example log format: `${time} | ${status} | ${latency} | ${method} ${path} | ${ip} | trace=${locals:requestid} | ${error}`
+- When logging inside handlers (e.g. for debugging or business logic), retrieve the trace ID with `requestid.FromContext(c)` and include it as `trace=<id>` in all log messages.
+
+### Swagger
+- All API handlers must have swaggo annotations (`@Summary`, `@Description`, `@Tags`, `@Produce`, `@Success`, `@Failure`, `@Router`).
+- Run `make backend-swagger` or `swag init -g cmd/server/main.go -o docs` after adding/changing endpoints.

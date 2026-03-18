@@ -1,0 +1,47 @@
+package handler
+
+import (
+	"github.com/gofiber/fiber/v3"
+
+	"github.com/hustlers/motivator-backend/internal/middleware"
+	"github.com/hustlers/motivator-backend/internal/model"
+)
+
+type Handlers struct {
+	Company    *CompanyHandler
+	Membership *MembershipHandler
+	Invite     *InviteHandler
+}
+
+func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
+	api := app.Group("/api/v1")
+
+	// Protected routes
+	protected := api.Group("", auth.Required())
+
+	// GET /me
+	protected.Get("/me", h.Membership.Me)
+
+	// Companies
+	protected.Post("/companies", h.Company.Create)
+
+	// Company-scoped routes (require membership)
+	company := protected.Group("/companies/:id", rbac.LoadMembership())
+	company.Get("", h.Company.GetByID)
+	company.Patch("", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Company.Update)
+	company.Delete("", middleware.RequireRole(model.RoleOwner), h.Company.Delete)
+
+	// Members
+	company.Get("/members", h.Membership.List)
+	company.Get("/members/:memberId", h.Membership.GetByID)
+	company.Patch("/members/:memberId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Membership.Update)
+	company.Delete("/members/:memberId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Membership.Deactivate)
+
+	// Invites (admin+)
+	company.Post("/invites", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Invite.Create)
+	company.Get("/invites", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Invite.List)
+	company.Delete("/invites/:inviteId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Invite.Revoke)
+
+	// Accept invite (auth required, but no company membership needed)
+	protected.Post("/invites/:token/accept", h.Invite.Accept)
+}
