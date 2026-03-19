@@ -6,6 +6,8 @@ import Dashboard from './pages/Dashboard'
 import Company from './pages/Company'
 import Members from './pages/Members'
 import Badges from './pages/Badges'
+import Achievements from './pages/Achievements'
+import Leaderboard from './pages/Leaderboard'
 import Invites from './pages/Invites'
 
 function App() {
@@ -31,6 +33,8 @@ function App() {
           <Route path="/company" element={<Company />} />
           <Route path="/members" element={<Members />} />
           <Route path="/badges" element={<Badges />} />
+          <Route path="/achievements" element={<Achievements />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/invites" element={<Invites />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />

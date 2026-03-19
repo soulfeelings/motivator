@@ -8,10 +8,12 @@ import (
 )
 
 type Handlers struct {
-	Company    *CompanyHandler
-	Membership *MembershipHandler
-	Invite     *InviteHandler
-	Badge      *BadgeHandler
+	Company     *CompanyHandler
+	Membership  *MembershipHandler
+	Invite      *InviteHandler
+	Badge       *BadgeHandler
+	Achievement *AchievementHandler
+	Leaderboard *LeaderboardHandler
 }
 
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
@@ -45,6 +47,16 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 	company.Post("/badges", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Badge.Create)
 	company.Delete("/badges/:badgeId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Badge.Delete)
 	company.Post("/members/:memberId/badges", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Badge.Award)
+
+	// Achievements
+	company.Get("/achievements", h.Achievement.List)
+	company.Post("/achievements", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Achievement.Create)
+	company.Delete("/achievements/:achievementId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Achievement.Delete)
+	company.Get("/members/:memberId/achievements", h.Achievement.ListMemberAchievements)
+	company.Post("/members/:memberId/metrics", h.Achievement.EvaluateMetric)
+
+	// Leaderboard
+	company.Get("/leaderboard", h.Leaderboard.Get)
 
 	// Invites (admin+)
 	company.Post("/invites", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Invite.Create)

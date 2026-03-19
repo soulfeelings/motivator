@@ -28,8 +28,8 @@ HR / operations. Sets up the company workspace, manages reward budgets, configur
 #### MVP
 - Company workspace setup (admin panel) — **TESTING**
 - Employee profiles with XP, levels, and achievement badges — **TESTING**
-- Achievement engine — define rules tied to work metrics (e.g. "Close 10 deals = Gold Closer badge")
-- Leaderboard — real-time ranking within teams / company
+- Achievement engine — define rules tied to work metrics (e.g. "Close 10 deals = Gold Closer badge") — **TESTING**
+- Leaderboard — real-time ranking within teams / company — **TESTING**
 - 1v1 challenges — head-to-head mini-competitions based on work metrics
 - Reward store — earn coins from achievements, spend on real rewards
 - Push notifications for achievements, challenge invites, leaderboard changes

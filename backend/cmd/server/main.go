@@ -41,19 +41,23 @@ func main() {
 	memberRepo := repository.NewMembershipRepository(pool)
 	inviteRepo := repository.NewInviteRepository(pool)
 	badgeRepo := repository.NewBadgeRepository(pool)
+	achievementRepo := repository.NewAchievementRepository(pool)
 
 	// Services
 	companySvc := service.NewCompanyService(pool, companyRepo, memberRepo)
 	memberSvc := service.NewMembershipService(memberRepo, badgeRepo)
 	inviteSvc := service.NewInviteService(pool, inviteRepo, memberRepo)
 	badgeSvc := service.NewBadgeService(pool, badgeRepo, memberRepo)
+	achievementSvc := service.NewAchievementService(pool, achievementRepo, memberRepo, badgeRepo)
 
 	// Handlers
 	handlers := handler.Handlers{
-		Company:    handler.NewCompanyHandler(companySvc),
-		Membership: handler.NewMembershipHandler(memberSvc),
-		Invite:     handler.NewInviteHandler(inviteSvc),
-		Badge:      handler.NewBadgeHandler(badgeSvc),
+		Company:     handler.NewCompanyHandler(companySvc),
+		Membership:  handler.NewMembershipHandler(memberSvc),
+		Invite:      handler.NewInviteHandler(inviteSvc),
+		Badge:       handler.NewBadgeHandler(badgeSvc),
+		Achievement: handler.NewAchievementHandler(achievementSvc),
+		Leaderboard: handler.NewLeaderboardHandler(memberSvc),
 	}
 
 	// Middleware
