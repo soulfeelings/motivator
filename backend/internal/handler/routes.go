@@ -16,7 +16,8 @@ type Handlers struct {
 	Leaderboard *LeaderboardHandler
 	Challenge   *ChallengeHandler
 	Reward      *RewardHandler
-	GamePlan    *GamePlanHandler
+	GamePlan     *GamePlanHandler
+	Notification *NotificationHandler
 }
 
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
@@ -85,6 +86,10 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 	company.Post("/game-plans/:planId/activate", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.GamePlan.Activate)
 	company.Post("/game-plans/:planId/deactivate", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.GamePlan.Deactivate)
 	company.Delete("/game-plans/:planId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.GamePlan.Delete)
+
+	// Notifications
+	company.Post("/notifications/register", h.Notification.RegisterToken)
+	company.Post("/notifications/unregister", h.Notification.UnregisterToken)
 
 	// Invites (admin+)
 	company.Post("/invites", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Invite.Create)

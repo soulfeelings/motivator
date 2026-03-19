@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/push_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -25,6 +26,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (memberships.isNotEmpty) {
         final m = memberships[0];
         setState(() => _profile = m);
+        PushService.init(m['company_id']);
       }
     } catch (_) {}
     if (mounted) setState(() => _loading = false);

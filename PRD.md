@@ -33,7 +33,7 @@ HR / operations. Sets up the company workspace, manages reward budgets, configur
 - Game Plan Builder — visual drag-and-drop editor (n8n-style) for designing gamification flows: triggers, conditions, rewards, quest chains — **TESTING**
 - 1v1 challenges — head-to-head mini-competitions based on work metrics — **TESTING**
 - Reward store — earn coins from achievements, spend on real rewards — **TESTING**
-- Push notifications for achievements, challenge invites, leaderboard changes
+- Push notifications for achievements, challenge invites, leaderboard changes — **TESTING**
 - Mobile app for employees, web admin panel for managers — **TESTING**
 
 #### v1

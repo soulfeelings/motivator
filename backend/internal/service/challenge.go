@@ -11,10 +11,11 @@ import (
 type ChallengeService struct {
 	challenges repository.ChallengeRepository
 	members    repository.MembershipRepository
+	notifier   Notifier
 }
 
-func NewChallengeService(challenges repository.ChallengeRepository, members repository.MembershipRepository) *ChallengeService {
-	return &ChallengeService{challenges: challenges, members: members}
+func NewChallengeService(challenges repository.ChallengeRepository, members repository.MembershipRepository, notifier Notifier) *ChallengeService {
+	return &ChallengeService{challenges: challenges, members: members, notifier: notifier}
 }
 
 func (s *ChallengeService) Create(ctx context.Context, companyID, challengerID string, req model.CreateChallengeRequest) (*model.Challenge, error) {
@@ -37,6 +38,7 @@ func (s *ChallengeService) Create(ctx context.Context, companyID, challengerID s
 	if err := s.challenges.Create(ctx, c); err != nil {
 		return nil, err
 	}
+	NotifyChallengeInvite(ctx, s.notifier, req.OpponentID, req.Metric, req.Target)
 	return c, nil
 }
 
@@ -109,6 +111,12 @@ func (s *ChallengeService) ReportScore(ctx context.Context, id, memberID string,
 		if c.XPReward > 0 {
 			s.members.AwardXP(ctx, winnerID, c.XPReward)
 		}
+
+		loserID := c.ChallengerID
+		if winnerID == c.ChallengerID {
+			loserID = c.OpponentID
+		}
+		NotifyChallengeCompleted(ctx, s.notifier, winnerID, loserID, c.XPReward)
 	}
 
 	return c, nil

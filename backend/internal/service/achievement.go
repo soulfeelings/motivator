@@ -15,10 +15,11 @@ type AchievementService struct {
 	achievements repository.AchievementRepository
 	members      repository.MembershipRepository
 	badges       repository.BadgeRepository
+	notifier     Notifier
 }
 
-func NewAchievementService(pool *pgxpool.Pool, achievements repository.AchievementRepository, members repository.MembershipRepository, badges repository.BadgeRepository) *AchievementService {
-	return &AchievementService{pool: pool, achievements: achievements, members: members, badges: badges}
+func NewAchievementService(pool *pgxpool.Pool, achievements repository.AchievementRepository, members repository.MembershipRepository, badges repository.BadgeRepository, notifier Notifier) *AchievementService {
+	return &AchievementService{pool: pool, achievements: achievements, members: members, badges: badges, notifier: notifier}
 }
 
 func (s *AchievementService) Create(ctx context.Context, companyID string, req model.CreateAchievementRequest) (*model.Achievement, error) {
@@ -112,6 +113,8 @@ func (s *AchievementService) EvaluateMetric(ctx context.Context, membershipID, c
 				log.Printf("error awarding XP for achievement=%s: %v", a.ID, err)
 			}
 		}
+
+		NotifyAchievementCompleted(ctx, s.notifier, membershipID, a.Name, a.XPReward, a.CoinReward)
 
 		ma.Achievement = &a
 		completed = append(completed, *ma)
