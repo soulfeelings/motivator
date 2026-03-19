@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS battles;
+DROP TABLE IF EXISTS army_units;
+DROP TABLE IF EXISTS base_buildings;
+DROP TABLE IF EXISTS unit_types;
+DROP TABLE IF EXISTS building_types;
+DROP TABLE IF EXISTS bases;

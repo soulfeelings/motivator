@@ -81,3 +81,19 @@ mobile-test:
 
 mobile-clean:
 	cd mobile && $(MAKE) clean
+
+# ─── Game Server ─────────────────────────────────────
+game-install:
+	cd game-server && $(MAKE) install
+
+game-dev:
+	cd game-server && $(MAKE) dev
+
+game-build:
+	cd game-server && $(MAKE) build
+
+game-test:
+	cd game-server && $(MAKE) test
+
+game-clean:
+	cd game-server && $(MAKE) clean

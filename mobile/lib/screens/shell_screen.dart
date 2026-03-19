@@ -4,6 +4,7 @@ import 'leaderboard_screen.dart';
 import 'challenges_screen.dart';
 import 'rewards_screen.dart';
 import 'profile_screen.dart';
+import 'game_screen.dart';
 
 class ShellScreen extends StatefulWidget {
   const ShellScreen({super.key});
@@ -27,6 +28,13 @@ class _ShellScreenState extends State<ShellScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_index],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const GameScreen()),
+        ),
+        backgroundColor: const Color(0xFF8B5CF6),
+        child: const Icon(Icons.sports_esports_rounded, color: Colors.white),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
