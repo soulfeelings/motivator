@@ -16,6 +16,7 @@ type Handlers struct {
 	Leaderboard *LeaderboardHandler
 	Challenge   *ChallengeHandler
 	Reward      *RewardHandler
+	GamePlan    *GamePlanHandler
 }
 
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
@@ -74,6 +75,16 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 
 	// Leaderboard
 	company.Get("/leaderboard", h.Leaderboard.Get)
+
+	// Game Plans
+	company.Get("/game-plans", h.GamePlan.List)
+	company.Post("/game-plans", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.GamePlan.Create)
+	company.Get("/game-plans/:planId", h.GamePlan.GetByID)
+	company.Patch("/game-plans/:planId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.GamePlan.Update)
+	company.Put("/game-plans/:planId/flow", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.GamePlan.SaveFlow)
+	company.Post("/game-plans/:planId/activate", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.GamePlan.Activate)
+	company.Post("/game-plans/:planId/deactivate", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.GamePlan.Deactivate)
+	company.Delete("/game-plans/:planId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.GamePlan.Delete)
 
 	// Invites (admin+)
 	company.Post("/invites", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Invite.Create)
