@@ -19,6 +19,8 @@ type Handlers struct {
 	GamePlan     *GamePlanHandler
 	Notification *NotificationHandler
 	Team         *TeamHandler
+	Tournament   *TournamentHandler
+	Webhook      *WebhookHandler
 }
 
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
@@ -105,6 +107,23 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 	company.Get("/team-battles", h.Team.ListBattles)
 	company.Post("/team-battles", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Team.CreateBattle)
 	company.Post("/team-battles/:battleId/score", h.Team.ReportScore)
+
+	// Tournaments
+	company.Get("/tournaments", h.Tournament.List)
+	company.Post("/tournaments", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Tournament.Create)
+	company.Get("/tournaments/:tournamentId", h.Tournament.GetByID)
+	company.Patch("/tournaments/:tournamentId/status", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Tournament.UpdateStatus)
+	company.Delete("/tournaments/:tournamentId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Tournament.Delete)
+	company.Post("/tournaments/:tournamentId/join", h.Tournament.Join)
+	company.Post("/tournaments/:tournamentId/leave", h.Tournament.Leave)
+	company.Post("/tournaments/:tournamentId/score", h.Tournament.SubmitScore)
+	company.Get("/tournaments/:tournamentId/standings", h.Tournament.GetStandings)
+	company.Post("/tournaments/:tournamentId/complete", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Tournament.Complete)
+
+	// Webhooks (Slack/Teams)
+	company.Get("/webhooks", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Webhook.List)
+	company.Post("/webhooks", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Webhook.Create)
+	company.Delete("/webhooks/:webhookId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Webhook.Delete)
 
 	// Invites (admin+)
 	company.Post("/invites", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Invite.Create)

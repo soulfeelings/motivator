@@ -47,6 +47,8 @@ func main() {
 	gamePlanRepo := repository.NewGamePlanRepository(pool)
 	deviceTokenRepo := repository.NewDeviceTokenRepository(pool)
 	teamRepo := repository.NewTeamRepository(pool)
+	tournamentRepo := repository.NewTournamentRepository(pool)
+	webhookRepo := repository.NewWebhookRepository(pool)
 
 	// Services
 	companySvc := service.NewCompanyService(pool, companyRepo, memberRepo)
@@ -59,6 +61,8 @@ func main() {
 	rewardSvc := service.NewRewardService(pool, rewardRepo, memberRepo)
 	gamePlanSvc := service.NewGamePlanService(gamePlanRepo)
 	teamSvc := service.NewTeamService(teamRepo, memberRepo)
+	tournamentSvc := service.NewTournamentService(tournamentRepo, memberRepo)
+	webhookSvc := service.NewWebhookService(webhookRepo)
 
 	// Handlers
 	handlers := handler.Handlers{
@@ -73,6 +77,8 @@ func main() {
 		GamePlan:     handler.NewGamePlanHandler(gamePlanSvc),
 		Notification: handler.NewNotificationHandler(notifSvc),
 		Team:         handler.NewTeamHandler(teamSvc),
+		Tournament:   handler.NewTournamentHandler(tournamentSvc),
+		Webhook:      handler.NewWebhookHandler(webhookSvc),
 	}
 
 	// Middleware

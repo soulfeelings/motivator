@@ -13,6 +13,8 @@ import GamePlanEditor from './pages/GamePlanEditor'
 import Teams from './pages/Teams'
 import Challenges from './pages/Challenges'
 import Rewards from './pages/Rewards'
+import Tournaments from './pages/Tournaments'
+import Webhooks from './pages/Webhooks'
 import Invites from './pages/Invites'
 
 function App() {
@@ -45,6 +47,8 @@ function App() {
           <Route path="/teams" element={<Teams />} />
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/rewards" element={<Rewards />} />
+          <Route path="/tournaments" element={<Tournaments />} />
+          <Route path="/webhooks" element={<Webhooks />} />
           <Route path="/invites" element={<Invites />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />

@@ -39,10 +39,10 @@ HR / operations. Sets up the company workspace, manages reward budgets, configur
 
 #### v1
 - Team vs team battles — **TESTING**
-- Seasonal tournaments with prize pools
+- Seasonal tournaments with prize pools — **TESTING**
 - Integration with CRMs, helpdesks, ERPs (Salesforce, Zendesk, SAP)
 - Analytics dashboard — engagement, productivity correlation, ROI
-- Slack / Teams notifications
+- Slack / Teams notifications — **TESTING**
 
 ### User Flows
 
