@@ -30,8 +30,9 @@ HR / operations. Sets up the company workspace, manages reward budgets, configur
 - Employee profiles with XP, levels, and achievement badges — **TESTING**
 - Achievement engine — define rules tied to work metrics (e.g. "Close 10 deals = Gold Closer badge") — **TESTING**
 - Leaderboard — real-time ranking within teams / company — **TESTING**
-- 1v1 challenges — head-to-head mini-competitions based on work metrics
-- Reward store — earn coins from achievements, spend on real rewards
+- Game Plan Builder — visual drag-and-drop editor (n8n-style) for designing gamification flows: triggers, conditions, rewards, quest chains
+- 1v1 challenges — head-to-head mini-competitions based on work metrics — **TESTING**
+- Reward store — earn coins from achievements, spend on real rewards — **TESTING**
 - Push notifications for achievements, challenge invites, leaderboard changes
 - Mobile app for employees, web admin panel for managers
 
@@ -39,7 +40,6 @@ HR / operations. Sets up the company workspace, manages reward budgets, configur
 - Team vs team battles
 - Seasonal tournaments with prize pools
 - Integration with CRMs, helpdesks, ERPs (Salesforce, Zendesk, SAP)
-- Custom achievement builder for managers
 - Analytics dashboard — engagement, productivity correlation, ROI
 - Slack / Teams notifications
 

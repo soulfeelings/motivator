@@ -14,6 +14,8 @@ type Handlers struct {
 	Badge       *BadgeHandler
 	Achievement *AchievementHandler
 	Leaderboard *LeaderboardHandler
+	Challenge   *ChallengeHandler
+	Reward      *RewardHandler
 }
 
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
@@ -54,6 +56,21 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 	company.Delete("/achievements/:achievementId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Achievement.Delete)
 	company.Get("/members/:memberId/achievements", h.Achievement.ListMemberAchievements)
 	company.Post("/members/:memberId/metrics", h.Achievement.EvaluateMetric)
+
+	// Challenges
+	company.Get("/challenges", h.Challenge.List)
+	company.Post("/challenges", h.Challenge.Create)
+	company.Post("/challenges/:challengeId/accept", h.Challenge.Accept)
+	company.Post("/challenges/:challengeId/decline", h.Challenge.Decline)
+	company.Post("/challenges/:challengeId/score", h.Challenge.ReportScore)
+
+	// Rewards
+	company.Get("/rewards", h.Reward.List)
+	company.Post("/rewards", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Reward.Create)
+	company.Delete("/rewards/:rewardId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Reward.Delete)
+	company.Post("/rewards/redeem", h.Reward.Redeem)
+	company.Get("/rewards/redemptions", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Reward.ListRedemptions)
+	company.Post("/rewards/redemptions/:redemptionId/fulfill", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Reward.FulfillRedemption)
 
 	// Leaderboard
 	company.Get("/leaderboard", h.Leaderboard.Get)

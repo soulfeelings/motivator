@@ -42,6 +42,8 @@ func main() {
 	inviteRepo := repository.NewInviteRepository(pool)
 	badgeRepo := repository.NewBadgeRepository(pool)
 	achievementRepo := repository.NewAchievementRepository(pool)
+	challengeRepo := repository.NewChallengeRepository(pool)
+	rewardRepo := repository.NewRewardRepository(pool)
 
 	// Services
 	companySvc := service.NewCompanyService(pool, companyRepo, memberRepo)
@@ -49,6 +51,8 @@ func main() {
 	inviteSvc := service.NewInviteService(pool, inviteRepo, memberRepo)
 	badgeSvc := service.NewBadgeService(pool, badgeRepo, memberRepo)
 	achievementSvc := service.NewAchievementService(pool, achievementRepo, memberRepo, badgeRepo)
+	challengeSvc := service.NewChallengeService(challengeRepo, memberRepo)
+	rewardSvc := service.NewRewardService(pool, rewardRepo, memberRepo)
 
 	// Handlers
 	handlers := handler.Handlers{
@@ -58,6 +62,8 @@ func main() {
 		Badge:       handler.NewBadgeHandler(badgeSvc),
 		Achievement: handler.NewAchievementHandler(achievementSvc),
 		Leaderboard: handler.NewLeaderboardHandler(memberSvc),
+		Challenge:   handler.NewChallengeHandler(challengeSvc),
+		Reward:      handler.NewRewardHandler(rewardSvc),
 	}
 
 	// Middleware
