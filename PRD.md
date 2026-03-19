@@ -34,7 +34,7 @@ HR / operations. Sets up the company workspace, manages reward budgets, configur
 - 1v1 challenges — head-to-head mini-competitions based on work metrics — **TESTING**
 - Reward store — earn coins from achievements, spend on real rewards — **TESTING**
 - Push notifications for achievements, challenge invites, leaderboard changes
-- Mobile app for employees, web admin panel for managers
+- Mobile app for employees, web admin panel for managers — **TESTING**
 
 #### v1
 - Team vs team battles
