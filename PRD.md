@@ -38,7 +38,7 @@ HR / operations. Sets up the company workspace, manages reward budgets, configur
 - Command Center — pseudo-3D RTS mini-game (build base, hire army, auto-battle opponents using work-earned coins) — **TESTING**
 
 #### v1
-- Team vs team battles
+- Team vs team battles — **TESTING**
 - Seasonal tournaments with prize pools
 - Integration with CRMs, helpdesks, ERPs (Salesforce, Zendesk, SAP)
 - Analytics dashboard — engagement, productivity correlation, ROI

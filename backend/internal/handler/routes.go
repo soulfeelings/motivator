@@ -18,6 +18,7 @@ type Handlers struct {
 	Reward      *RewardHandler
 	GamePlan     *GamePlanHandler
 	Notification *NotificationHandler
+	Team         *TeamHandler
 }
 
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
@@ -90,6 +91,20 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 	// Notifications
 	company.Post("/notifications/register", h.Notification.RegisterToken)
 	company.Post("/notifications/unregister", h.Notification.UnregisterToken)
+
+	// Teams
+	company.Get("/teams", h.Team.List)
+	company.Post("/teams", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Team.Create)
+	company.Get("/teams/:teamId", h.Team.GetByID)
+	company.Delete("/teams/:teamId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Team.Delete)
+	company.Get("/teams/:teamId/members", h.Team.ListMembers)
+	company.Post("/teams/:teamId/members", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Team.AddMember)
+	company.Delete("/teams/:teamId/members/:membershipId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Team.RemoveMember)
+
+	// Team Battles
+	company.Get("/team-battles", h.Team.ListBattles)
+	company.Post("/team-battles", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Team.CreateBattle)
+	company.Post("/team-battles/:battleId/score", h.Team.ReportScore)
 
 	// Invites (admin+)
 	company.Post("/invites", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Invite.Create)
