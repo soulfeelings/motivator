@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Company from './pages/Company'
 import Members from './pages/Members'
+import Badges from './pages/Badges'
 import Invites from './pages/Invites'
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/company" element={<Company />} />
           <Route path="/members" element={<Members />} />
+          <Route path="/badges" element={<Badges />} />
           <Route path="/invites" element={<Invites />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />

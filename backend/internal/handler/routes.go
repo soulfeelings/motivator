@@ -11,6 +11,7 @@ type Handlers struct {
 	Company    *CompanyHandler
 	Membership *MembershipHandler
 	Invite     *InviteHandler
+	Badge      *BadgeHandler
 }
 
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
@@ -34,8 +35,16 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 	// Members
 	company.Get("/members", h.Membership.List)
 	company.Get("/members/:memberId", h.Membership.GetByID)
+	company.Get("/members/:memberId/profile", h.Membership.GetProfile)
+	company.Post("/members/:memberId/xp", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Membership.AwardXP)
 	company.Patch("/members/:memberId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Membership.Update)
 	company.Delete("/members/:memberId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Membership.Deactivate)
+
+	// Badges
+	company.Get("/badges", h.Badge.List)
+	company.Post("/badges", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Badge.Create)
+	company.Delete("/badges/:badgeId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Badge.Delete)
+	company.Post("/members/:memberId/badges", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Badge.Award)
 
 	// Invites (admin+)
 	company.Post("/invites", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Invite.Create)

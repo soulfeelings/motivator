@@ -140,6 +140,68 @@ func (h *MembershipHandler) Deactivate(c fiber.Ctx) error {
 	return response.Success(c, fiber.Map{"deactivated": true})
 }
 
+// GetProfile godoc
+// @Summary Get member profile
+// @Description Returns member profile with XP, level, coins, and badges
+// @Tags members
+// @Produce json
+// @Param id path string true "Company ID"
+// @Param memberId path string true "Membership ID"
+// @Success 200 {object} model.ProfileResponse
+// @Router /companies/{id}/members/{memberId}/profile [get]
+func (h *MembershipHandler) GetProfile(c fiber.Ctx) error {
+	traceID := requestid.FromContext(c)
+	memberID := c.Params("memberId")
+
+	log.Printf("trace=%s | fetching profile for member=%s", traceID, memberID)
+
+	profile, err := h.svc.GetProfile(c.Context(), memberID)
+	if err != nil {
+		if errors.Is(err, model.ErrNotFound) {
+			return response.NotFound(c, "member not found")
+		}
+		log.Printf("trace=%s | error fetching profile: %v", traceID, err)
+		return response.InternalError(c)
+	}
+	return response.Success(c, profile)
+}
+
+// AwardXP godoc
+// @Summary Award XP to member
+// @Description Award XP points to a member (admin+ only)
+// @Tags members
+// @Accept json
+// @Produce json
+// @Param id path string true "Company ID"
+// @Param memberId path string true "Membership ID"
+// @Param body body model.AwardXPRequest true "XP amount"
+// @Success 200 {object} model.Membership
+// @Router /companies/{id}/members/{memberId}/xp [post]
+func (h *MembershipHandler) AwardXP(c fiber.Ctx) error {
+	traceID := requestid.FromContext(c)
+	memberID := c.Params("memberId")
+
+	var req model.AwardXPRequest
+	if err := c.Bind().JSON(&req); err != nil {
+		return response.BadRequest(c, "invalid request body")
+	}
+	if req.Amount <= 0 {
+		return response.BadRequest(c, "amount must be positive")
+	}
+
+	log.Printf("trace=%s | awarding %d XP to member=%s reason=%s", traceID, req.Amount, memberID, req.Reason)
+
+	member, err := h.svc.AwardXP(c.Context(), memberID, req.Amount)
+	if err != nil {
+		if errors.Is(err, model.ErrNotFound) {
+			return response.NotFound(c, "member not found")
+		}
+		log.Printf("trace=%s | error awarding XP: %v", traceID, err)
+		return response.InternalError(c)
+	}
+	return response.Success(c, member)
+}
+
 // Me godoc
 // @Summary Get current user profile
 // @Description Returns current user's memberships across all companies

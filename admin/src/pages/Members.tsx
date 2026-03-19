@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
-import { Shield, UserX } from 'lucide-react'
+import { Shield, UserX, Zap, Coins } from 'lucide-react'
 
 interface Member {
   id: string
@@ -8,6 +8,9 @@ interface Member {
   role: string
   display_name?: string
   job_title?: string
+  xp: number
+  level: number
+  coins: number
   is_active: boolean
   joined_at: string
 }
@@ -74,6 +77,9 @@ export default function Members() {
               <tr className="border-b border-gray-800">
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">XP</th>
+                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Coins</th>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
                 <th className="px-5 py-3"></th>
               </tr>
@@ -89,6 +95,23 @@ export default function Members() {
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${roleBadge[m.role] ?? roleBadge.employee}`}>
                       <Shield size={12} />
                       {m.role}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className="inline-flex items-center gap-1 text-sm font-bold text-white">
+                      {m.level}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className="inline-flex items-center gap-1 text-sm text-emerald-400">
+                      <Zap size={14} />
+                      {m.xp}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className="inline-flex items-center gap-1 text-sm text-amber-400">
+                      <Coins size={14} />
+                      {m.coins}
                     </span>
                   </td>
                   <td className="px-5 py-4 text-sm text-gray-500">

@@ -40,17 +40,20 @@ func main() {
 	companyRepo := repository.NewCompanyRepository(pool)
 	memberRepo := repository.NewMembershipRepository(pool)
 	inviteRepo := repository.NewInviteRepository(pool)
+	badgeRepo := repository.NewBadgeRepository(pool)
 
 	// Services
 	companySvc := service.NewCompanyService(pool, companyRepo, memberRepo)
-	memberSvc := service.NewMembershipService(memberRepo)
+	memberSvc := service.NewMembershipService(memberRepo, badgeRepo)
 	inviteSvc := service.NewInviteService(pool, inviteRepo, memberRepo)
+	badgeSvc := service.NewBadgeService(pool, badgeRepo, memberRepo)
 
 	// Handlers
 	handlers := handler.Handlers{
 		Company:    handler.NewCompanyHandler(companySvc),
 		Membership: handler.NewMembershipHandler(memberSvc),
 		Invite:     handler.NewInviteHandler(inviteSvc),
+		Badge:      handler.NewBadgeHandler(badgeSvc),
 	}
 
 	// Middleware

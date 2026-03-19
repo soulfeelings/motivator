@@ -1,11 +1,12 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { Building2, Users, Mail, LayoutDashboard, LogOut } from 'lucide-react'
+import { Building2, Users, Mail, LayoutDashboard, LogOut, Award } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 const nav = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/company', label: 'Company', icon: Building2 },
   { to: '/members', label: 'Members', icon: Users },
+  { to: '/badges', label: 'Badges', icon: Award },
   { to: '/invites', label: 'Invites', icon: Mail },
 ]
 

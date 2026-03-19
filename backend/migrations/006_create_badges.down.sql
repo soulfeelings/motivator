@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS member_badges;
+DROP TABLE IF EXISTS badges;

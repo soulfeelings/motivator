@@ -1,0 +1,4 @@
+ALTER TABLE memberships
+    DROP COLUMN IF EXISTS xp,
+    DROP COLUMN IF EXISTS level,
+    DROP COLUMN IF EXISTS coins;
