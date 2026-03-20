@@ -40,7 +40,7 @@ HR / operations. Sets up the company workspace, manages reward budgets, configur
 #### v1
 - Team vs team battles — **TESTING**
 - Seasonal tournaments with prize pools — **TESTING**
-- Integration with CRMs, helpdesks, ERPs (Salesforce, Zendesk, SAP)
+- Generic integrations system (Jira, GitHub, Salesforce, Zendesk, Custom) with webhook receiver and event-to-metric mappings — **TESTING**
 - Analytics dashboard — engagement, productivity correlation, ROI
 - Slack / Teams notifications — **TESTING**
 

@@ -21,6 +21,7 @@ type Handlers struct {
 	Team         *TeamHandler
 	Tournament   *TournamentHandler
 	Webhook      *WebhookHandler
+	Integration  *IntegrationHandler
 }
 
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
@@ -130,6 +131,18 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 	company.Get("/invites", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Invite.List)
 	company.Delete("/invites/:inviteId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Invite.Revoke)
 
+	// Integrations
+	company.Get("/integrations", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Integration.List)
+	company.Post("/integrations", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Integration.Create)
+	company.Delete("/integrations/:integrationId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Integration.Delete)
+	company.Get("/integrations/:integrationId/mappings", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Integration.ListMappings)
+	company.Post("/integrations/:integrationId/mappings", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Integration.CreateMapping)
+	company.Delete("/integrations/:integrationId/mappings/:mappingId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Integration.DeleteMapping)
+	company.Get("/integrations/:integrationId/events", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Integration.ListEvents)
+
 	// Accept invite (auth required, but no company membership needed)
 	protected.Post("/invites/:token/accept", h.Invite.Accept)
+
+	// Public inbound webhook (no auth — validated by secret)
+	api.Post("/webhooks/inbound/:secret", h.Integration.InboundWebhook)
 }
