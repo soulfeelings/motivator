@@ -13,6 +13,7 @@ import GamePlanEditor from './pages/GamePlanEditor'
 import Teams from './pages/Teams'
 import Challenges from './pages/Challenges'
 import Rewards from './pages/Rewards'
+import Quests from './pages/Quests'
 import Tournaments from './pages/Tournaments'
 import Analytics from './pages/Analytics'
 import Integrations from './pages/Integrations'
@@ -50,6 +51,7 @@ function App() {
           <Route path="/teams" element={<Teams />} />
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/rewards" element={<Rewards />} />
+          <Route path="/quests" element={<Quests />} />
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/integrations" element={<Integrations />} />

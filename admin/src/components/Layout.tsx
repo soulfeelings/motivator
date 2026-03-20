@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { Building2, Users, Mail, LayoutDashboard, LogOut, Award, Target, Trophy, Swords, Gift, Workflow, Users2, Bell, Plug, BarChart3, Book } from 'lucide-react'
+import { Building2, Users, Mail, LayoutDashboard, LogOut, Award, Target, Trophy, Swords, Gift, Workflow, Users2, Bell, Plug, BarChart3, Book, Heart } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 const nav = [
@@ -13,6 +13,7 @@ const nav = [
   { to: '/teams', label: 'Teams', icon: Users2 },
   { to: '/challenges', label: 'Challenges', icon: Swords },
   { to: '/rewards', label: 'Rewards', icon: Gift },
+  { to: '/quests', label: 'Quests', icon: Heart },
   { to: '/tournaments', label: 'Tournaments', icon: Trophy },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/integrations', label: 'Integrations', icon: Plug },

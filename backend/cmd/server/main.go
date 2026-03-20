@@ -67,6 +67,8 @@ func main() {
 	integrationSvc := service.NewIntegrationService(integrationRepo, memberRepo, achievementRepo)
 	analyticsRepo := repository.NewAnalyticsRepository(pool)
 	analyticsSvc := service.NewAnalyticsService(analyticsRepo)
+	questRepo := repository.NewQuestRepository(pool)
+	questSvc := service.NewQuestService(questRepo, memberRepo)
 
 	// Handlers
 	handlers := handler.Handlers{
@@ -85,6 +87,7 @@ func main() {
 		Webhook:      handler.NewWebhookHandler(webhookSvc),
 		Integration:  handler.NewIntegrationHandler(integrationSvc),
 		Analytics:    handler.NewAnalyticsHandler(analyticsSvc),
+		Quest:        handler.NewQuestHandler(questSvc),
 	}
 
 	// Middleware

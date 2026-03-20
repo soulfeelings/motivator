@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/push_service.dart';
+import 'quest_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -83,6 +84,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       value: (_profile!['role'] ?? 'employee').toString().toUpperCase(),
                       icon: Icons.shield_rounded,
                       color: const Color(0xFF6366F1),
+                    ),
+                    const SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const QuestScreen()),
+                      ),
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44, height: 44,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEC4899).withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(Icons.favorite_rounded, color: Color(0xFFEC4899), size: 22),
+                              ),
+                              const SizedBox(width: 16),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Secret Motivator', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                                    Text('Send anonymous encouragement', style: TextStyle(color: Color(0xFF6B7280), fontSize: 12)),
+                                  ],
+                                ),
+                              ),
+                              const Icon(Icons.chevron_right_rounded, color: Color(0xFF4B5563)),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ] else
                     Card(

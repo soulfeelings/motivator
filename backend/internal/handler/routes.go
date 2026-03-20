@@ -23,6 +23,7 @@ type Handlers struct {
 	Webhook      *WebhookHandler
 	Integration  *IntegrationHandler
 	Analytics    *AnalyticsHandler
+	Quest        *QuestHandler
 }
 
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
@@ -143,6 +144,21 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 
 	// Analytics
 	company.Get("/analytics", middleware.RequireRole(model.RoleOwner, model.RoleAdmin, model.RoleManager), h.Analytics.GetDashboard)
+
+	// Quests (Secret Motivator)
+	company.Get("/quests", h.Quest.List)
+	company.Post("/quests", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Quest.Create)
+	company.Get("/quests/:questId", h.Quest.GetByID)
+	company.Delete("/quests/:questId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Quest.Delete)
+	company.Post("/quests/:questId/start", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Quest.Start)
+	company.Get("/quests/:questId/my-target", h.Quest.GetMyTarget)
+	company.Post("/quests/:questId/send", h.Quest.SendMessage)
+	company.Get("/quests/:questId/messages", h.Quest.GetReceivedMessages)
+	company.Post("/quests/:questId/voting", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Quest.StartVoting)
+	company.Post("/quests/:questId/vote", h.Quest.Vote)
+	company.Post("/quests/:questId/reveal", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Quest.Reveal)
+	company.Post("/quests/:questId/complete", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Quest.Complete)
+	company.Get("/quests/:questId/pairs", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Quest.ListPairs)
 
 	// Accept invite (auth required, but no company membership needed)
 	protected.Post("/invites/:token/accept", h.Invite.Accept)

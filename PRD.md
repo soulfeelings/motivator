@@ -36,6 +36,7 @@ HR / operations. Sets up the company workspace, manages reward budgets, configur
 - Push notifications for achievements, challenge invites, leaderboard changes — **TESTING**
 - Mobile app for employees, web admin panel for managers — **TESTING**
 - Command Center — pseudo-3D RTS mini-game (build base, hire army, auto-battle opponents using work-earned coins) — **TESTING**
+- Secret Motivator — company-wide anonymous positivity quest with random pairing, messaging, voting, and reveal — **TESTING**
 
 #### v1
 - Team vs team battles — **TESTING**

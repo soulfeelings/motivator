@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS quest_votes;
+DROP TABLE IF EXISTS quest_pairs;
+DROP TABLE IF EXISTS quests;
+DROP TYPE IF EXISTS quest_status;
