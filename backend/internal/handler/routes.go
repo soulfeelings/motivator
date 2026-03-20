@@ -22,6 +22,7 @@ type Handlers struct {
 	Tournament   *TournamentHandler
 	Webhook      *WebhookHandler
 	Integration  *IntegrationHandler
+	Analytics    *AnalyticsHandler
 }
 
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
@@ -139,6 +140,9 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 	company.Post("/integrations/:integrationId/mappings", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Integration.CreateMapping)
 	company.Delete("/integrations/:integrationId/mappings/:mappingId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Integration.DeleteMapping)
 	company.Get("/integrations/:integrationId/events", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Integration.ListEvents)
+
+	// Analytics
+	company.Get("/analytics", middleware.RequireRole(model.RoleOwner, model.RoleAdmin, model.RoleManager), h.Analytics.GetDashboard)
 
 	// Accept invite (auth required, but no company membership needed)
 	protected.Post("/invites/:token/accept", h.Invite.Accept)

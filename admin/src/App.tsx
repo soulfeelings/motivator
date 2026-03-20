@@ -14,6 +14,7 @@ import Teams from './pages/Teams'
 import Challenges from './pages/Challenges'
 import Rewards from './pages/Rewards'
 import Tournaments from './pages/Tournaments'
+import Analytics from './pages/Analytics'
 import Integrations from './pages/Integrations'
 import Webhooks from './pages/Webhooks'
 import Invites from './pages/Invites'
@@ -49,6 +50,7 @@ function App() {
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/rewards" element={<Rewards />} />
           <Route path="/tournaments" element={<Tournaments />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="/integrations" element={<Integrations />} />
           <Route path="/webhooks" element={<Webhooks />} />
           <Route path="/invites" element={<Invites />} />

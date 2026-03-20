@@ -65,6 +65,8 @@ func main() {
 	tournamentSvc := service.NewTournamentService(tournamentRepo, memberRepo)
 	webhookSvc := service.NewWebhookService(webhookRepo)
 	integrationSvc := service.NewIntegrationService(integrationRepo, memberRepo, achievementRepo)
+	analyticsRepo := repository.NewAnalyticsRepository(pool)
+	analyticsSvc := service.NewAnalyticsService(analyticsRepo)
 
 	// Handlers
 	handlers := handler.Handlers{
@@ -82,6 +84,7 @@ func main() {
 		Tournament:   handler.NewTournamentHandler(tournamentSvc),
 		Webhook:      handler.NewWebhookHandler(webhookSvc),
 		Integration:  handler.NewIntegrationHandler(integrationSvc),
+		Analytics:    handler.NewAnalyticsHandler(analyticsSvc),
 	}
 
 	// Middleware
