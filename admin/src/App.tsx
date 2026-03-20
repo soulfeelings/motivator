@@ -18,6 +18,7 @@ import Analytics from './pages/Analytics'
 import Integrations from './pages/Integrations'
 import Webhooks from './pages/Webhooks'
 import Invites from './pages/Invites'
+import DocsPage from './pages/Docs'
 
 function App() {
   const { session, loading } = useAuth()
@@ -54,6 +55,7 @@ function App() {
           <Route path="/integrations" element={<Integrations />} />
           <Route path="/webhooks" element={<Webhooks />} />
           <Route path="/invites" element={<Invites />} />
+          <Route path="/docs" element={<DocsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
