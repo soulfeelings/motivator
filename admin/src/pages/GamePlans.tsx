@@ -145,7 +145,7 @@ export default function GamePlans() {
                 <div>
                   <h3 className="text-white font-medium">{plan.name}</h3>
                   <p className="text-xs text-gray-500">
-                    {plan.flow_data.nodes.length} nodes · {plan.flow_data.edges.length} connections
+                    {plan.flow_data?.nodes?.length ?? 0} nodes · {plan.flow_data?.edges?.length ?? 0} connections
                     {plan.description && ` · ${plan.description}`}
                   </p>
                 </div>

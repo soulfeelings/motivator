@@ -36,6 +36,13 @@ export default function GamePlanEditor() {
         const cid = me.memberships[0].company_id
         setCompanyId(cid)
         const gp = await api.get<GamePlan>(`/companies/${cid}/game-plans/${planId}`)
+        // Ensure flow_data has arrays, not null
+        if (gp.flow_data) {
+          gp.flow_data.nodes = gp.flow_data.nodes ?? []
+          gp.flow_data.edges = gp.flow_data.edges ?? []
+        } else {
+          gp.flow_data = { nodes: [], edges: [] }
+        }
         setPlan(gp)
       }
     } catch {
