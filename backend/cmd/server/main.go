@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/contrib/v3/swaggo"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/gofiber/fiber/v3/middleware/requestid"
 
@@ -99,6 +100,7 @@ func main() {
 		AppName: "Motivator API",
 	})
 
+	app.Use(cors.New())
 	app.Use(requestid.New())
 	app.Use(logger.New(logger.Config{
 		Format:     "${time} | ${status} | ${latency} | ${method} ${path} | ${ip} | trace=${locals:requestid} | ${error}\n",

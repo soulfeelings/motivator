@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-const BASE = '/api/v1'
+const BASE = import.meta.env.VITE_API_URL || '/api/v1'
 
 async function getToken(): Promise<string> {
   const { data } = await supabase.auth.getSession()
@@ -17,7 +17,13 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     },
     body: body ? JSON.stringify(body) : undefined,
   })
-  const json = await res.json()
+  const text = await res.text()
+  let json: any
+  try {
+    json = JSON.parse(text)
+  } catch {
+    throw new Error(`Server error (${res.status})`)
+  }
   if (!json.success) {
     throw new Error(json.error || 'Request failed')
   }
