@@ -2,18 +2,22 @@ package service
 
 import (
 	"context"
+	"log"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/hustlers/motivator-backend/internal/model"
 	"github.com/hustlers/motivator-backend/internal/repository"
 )
 
 type MembershipService struct {
+	pool    *pgxpool.Pool
 	members repository.MembershipRepository
 	badges  repository.BadgeRepository
 }
 
-func NewMembershipService(members repository.MembershipRepository, badges repository.BadgeRepository) *MembershipService {
-	return &MembershipService{members: members, badges: badges}
+func NewMembershipService(pool *pgxpool.Pool, members repository.MembershipRepository, badges repository.BadgeRepository) *MembershipService {
+	return &MembershipService{pool: pool, members: members, badges: badges}
 }
 
 func (s *MembershipService) GetByID(ctx context.Context, id string) (*model.Membership, error) {
@@ -56,6 +60,32 @@ func (s *MembershipService) GetProfile(ctx context.Context, id string) (*model.P
 		}
 	}
 	return &model.ProfileResponse{Membership: *m, Badges: badgeList}, nil
+}
+
+func (s *MembershipService) AddToCompany(ctx context.Context, userID, companyID string, role model.Role, displayName *string) (*model.Membership, error) {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil {
+			log.Printf("rollback error: %v", err)
+		}
+	}()
+
+	m := &model.Membership{
+		UserID:      userID,
+		CompanyID:   companyID,
+		Role:        role,
+		DisplayName: displayName,
+	}
+	if err := s.members.Create(ctx, tx, m); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (s *MembershipService) Deactivate(ctx context.Context, id string) error {

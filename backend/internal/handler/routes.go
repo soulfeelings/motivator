@@ -46,6 +46,7 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 
 	// Members
 	company.Get("/members", h.Membership.List)
+	company.Post("/members/add", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Membership.AddMember)
 	company.Get("/members/:memberId", h.Membership.GetByID)
 	company.Get("/members/:memberId/profile", h.Membership.GetProfile)
 	company.Post("/members/:memberId/xp", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Membership.AwardXP)

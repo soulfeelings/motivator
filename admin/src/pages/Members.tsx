@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
-import { Shield, UserX, Zap, Coins } from 'lucide-react'
+import { Shield, UserX, Zap, Coins, UserPlus } from 'lucide-react'
 
 interface Member {
   id: string
@@ -30,6 +30,13 @@ export default function Members() {
   const [members, setMembers] = useState<Member[]>([])
   const [companyId, setCompanyId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [adding, setAdding] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [displayName, setDisplayName] = useState('')
+  const [role, setRole] = useState('employee')
+  const [error, setError] = useState('')
+  const [addLoading, setAddLoading] = useState(false)
 
   useEffect(() => {
     loadMembers()
@@ -51,6 +58,31 @@ export default function Members() {
     }
   }
 
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault()
+    if (!companyId) return
+    setError('')
+    setAddLoading(true)
+    try {
+      await api.post(`/companies/${companyId}/members/add`, {
+        email,
+        password,
+        role,
+        display_name: displayName || undefined,
+      })
+      setAdding(false)
+      setEmail('')
+      setPassword('')
+      setDisplayName('')
+      setRole('employee')
+      loadMembers()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setAddLoading(false)
+    }
+  }
+
   async function deactivate(memberId: string) {
     if (!companyId || !confirm('Remove this member?')) return
     await api.delete(`/companies/${companyId}/members/${memberId}`)
@@ -63,12 +95,86 @@ export default function Members() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white">Members</h2>
-        <span className="text-sm text-gray-500">{members.length} total</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-500">{members.length} total</span>
+          <button
+            onClick={() => setAdding(!adding)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            <UserPlus size={16} />
+            Add Member
+          </button>
+        </div>
       </div>
+
+      {adding && (
+        <form onSubmit={handleAdd} className="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6 space-y-4 max-w-lg">
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1.5">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
+              placeholder="employee@company.com"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1.5">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
+              placeholder="Min 6 characters"
+              minLength={6}
+              required
+            />
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-400 mb-1.5">Display Name</label>
+              <input
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                placeholder="John Doe"
+              />
+            </div>
+            <div className="w-40">
+              <label className="block text-sm font-medium text-gray-400 mb-1.5">Role</label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              >
+                <option value="employee">Employee</option>
+                <option value="manager">Manager</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={addLoading}
+              className="px-4 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
+            >
+              {addLoading ? 'Creating...' : 'Create & Add'}
+            </button>
+            <button type="button" onClick={() => { setAdding(false); setError('') }} className="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-lg transition-colors">
+              Cancel
+            </button>
+          </div>
+          <p className="text-xs text-gray-600">Creates a Supabase Auth account and adds them to the company in one step.</p>
+        </form>
+      )}
 
       {members.length === 0 ? (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-          <p className="text-gray-400">No members yet. Send invites to add people.</p>
+          <p className="text-gray-400">No members yet. Add your first team member above.</p>
         </div>
       ) : (
         <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
@@ -98,20 +204,16 @@ export default function Members() {
                     </span>
                   </td>
                   <td className="px-5 py-4">
-                    <span className="inline-flex items-center gap-1 text-sm font-bold text-white">
-                      {m.level}
-                    </span>
+                    <span className="inline-flex items-center gap-1 text-sm font-bold text-white">{m.level}</span>
                   </td>
                   <td className="px-5 py-4">
                     <span className="inline-flex items-center gap-1 text-sm text-emerald-400">
-                      <Zap size={14} />
-                      {m.xp}
+                      <Zap size={14} /> {m.xp}
                     </span>
                   </td>
                   <td className="px-5 py-4">
                     <span className="inline-flex items-center gap-1 text-sm text-amber-400">
-                      <Coins size={14} />
-                      {m.coins}
+                      <Coins size={14} /> {m.coins}
                     </span>
                   </td>
                   <td className="px-5 py-4 text-sm text-gray-500">

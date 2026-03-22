@@ -53,8 +53,9 @@ func main() {
 	integrationRepo := repository.NewIntegrationRepository(pool)
 
 	// Services
+	supabaseAdmin := service.NewSupabaseAdmin(cfg.SupabaseURL, cfg.SupabaseServiceKey)
 	companySvc := service.NewCompanyService(pool, companyRepo, memberRepo)
-	memberSvc := service.NewMembershipService(memberRepo, badgeRepo)
+	memberSvc := service.NewMembershipService(pool, memberRepo, badgeRepo)
 	inviteSvc := service.NewInviteService(pool, inviteRepo, memberRepo)
 	badgeSvc := service.NewBadgeService(pool, badgeRepo, memberRepo)
 	notifSvc := service.NewNotificationService(deviceTokenRepo)
@@ -74,7 +75,7 @@ func main() {
 	// Handlers
 	handlers := handler.Handlers{
 		Company:     handler.NewCompanyHandler(companySvc),
-		Membership:  handler.NewMembershipHandler(memberSvc),
+		Membership:  handler.NewMembershipHandler(memberSvc, supabaseAdmin),
 		Invite:      handler.NewInviteHandler(inviteSvc),
 		Badge:       handler.NewBadgeHandler(badgeSvc),
 		Achievement: handler.NewAchievementHandler(achievementSvc),

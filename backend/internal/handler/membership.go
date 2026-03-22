@@ -14,11 +14,12 @@ import (
 )
 
 type MembershipHandler struct {
-	svc *service.MembershipService
+	svc           *service.MembershipService
+	supabaseAdmin *service.SupabaseAdmin
 }
 
-func NewMembershipHandler(svc *service.MembershipService) *MembershipHandler {
-	return &MembershipHandler{svc: svc}
+func NewMembershipHandler(svc *service.MembershipService, supabaseAdmin *service.SupabaseAdmin) *MembershipHandler {
+	return &MembershipHandler{svc: svc, supabaseAdmin: supabaseAdmin}
 }
 
 // List godoc
@@ -138,6 +139,55 @@ func (h *MembershipHandler) Deactivate(c fiber.Ctx) error {
 		return response.InternalError(c)
 	}
 	return response.Success(c, fiber.Map{"deactivated": true})
+}
+
+// AddMember godoc
+// @Summary Add a new member
+// @Description Creates a Supabase Auth user and adds them as a company member in one step
+// @Tags members
+// @Accept json
+// @Produce json
+// @Param id path string true "Company ID"
+// @Param body body model.AddMemberRequest true "Member data"
+// @Success 201 {object} model.AddMemberResponse
+// @Router /companies/{id}/members/add [post]
+func (h *MembershipHandler) AddMember(c fiber.Ctx) error {
+	traceID := requestid.FromContext(c)
+	companyID := c.Params("id")
+
+	var req model.AddMemberRequest
+	if err := c.Bind().JSON(&req); err != nil {
+		return response.BadRequest(c, "invalid request body")
+	}
+	if req.Email == "" || req.Password == "" {
+		return response.BadRequest(c, "email and password are required")
+	}
+	if req.Role == "" {
+		req.Role = model.RoleEmployee
+	}
+
+	log.Printf("trace=%s | adding member email=%s role=%s company=%s", traceID, req.Email, req.Role, companyID)
+
+	// Create user in Supabase Auth
+	user, err := h.supabaseAdmin.CreateUser(c.Context(), req.Email, req.Password)
+	if err != nil {
+		log.Printf("trace=%s | error creating supabase user: %v", traceID, err)
+		return response.BadRequest(c, err.Error())
+	}
+
+	// Create membership
+	membership, err := h.svc.AddToCompany(c.Context(), user.ID, companyID, req.Role, req.DisplayName)
+	if err != nil {
+		log.Printf("trace=%s | error creating membership: %v", traceID, err)
+		return response.InternalError(c)
+	}
+
+	log.Printf("trace=%s | member added user=%s membership=%s", traceID, user.ID, membership.ID)
+	return response.Created(c, model.AddMemberResponse{
+		UserID:     user.ID,
+		Email:      user.Email,
+		Membership: *membership,
+	})
 }
 
 // GetProfile godoc

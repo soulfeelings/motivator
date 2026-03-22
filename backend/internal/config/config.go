@@ -6,10 +6,11 @@ import (
 )
 
 type Config struct {
-	Port              string
-	DatabaseURL       string
-	SupabaseURL       string
-	SupabaseJWTSecret string
+	Port               string
+	DatabaseURL        string
+	SupabaseURL        string
+	SupabaseJWTSecret  string
+	SupabaseServiceKey string
 }
 
 func Load() (*Config, error) {
@@ -17,7 +18,8 @@ func Load() (*Config, error) {
 		Port:              getEnv("PORT", "8080"),
 		DatabaseURL:       os.Getenv("DATABASE_URL"),
 		SupabaseURL:       os.Getenv("SUPABASE_URL"),
-		SupabaseJWTSecret: os.Getenv("SUPABASE_JWT_SECRET"),
+		SupabaseJWTSecret:  os.Getenv("SUPABASE_JWT_SECRET"),
+		SupabaseServiceKey: os.Getenv("SUPABASE_SERVICE_KEY"),
 	}
 
 	if cfg.DatabaseURL == "" {
