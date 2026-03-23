@@ -29,6 +29,9 @@ type Handlers struct {
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
 	api := app.Group("/api/v1")
 
+	// Public inbound webhook (no auth — validated by secret)
+	api.Post("/webhooks/inbound/:secret", h.Integration.InboundWebhook)
+
 	// Protected routes
 	protected := api.Group("", auth.Required())
 
@@ -163,7 +166,4 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 
 	// Accept invite (auth required, but no company membership needed)
 	protected.Post("/invites/:token/accept", h.Invite.Accept)
-
-	// Public inbound webhook (no auth — validated by secret)
-	api.Post("/webhooks/inbound/:secret", h.Integration.InboundWebhook)
 }
