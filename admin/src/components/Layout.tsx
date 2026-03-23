@@ -33,7 +33,7 @@ export default function Layout() {
           <h1 className="text-xl font-bold tracking-tight text-white">Motivator</h1>
           <p className="text-xs text-gray-500 mt-1">Admin Panel</p>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
           {nav.map(({ to, label, icon: Icon }) => {
             const active = pathname === to
             return (
