@@ -49,7 +49,7 @@ Use this video everywhere: cold emails, LinkedIn DMs, landing page.
 |-------|------------|-----|---------------------------------------------|
 | 1     | Email      | 0   | Send Email 1 (The Opener)                   |
 | 2     | LinkedIn   | 1   | Send connection request                     |
-| 3     | Email      | 3   | Send Email 2 (The Stat + demo video link)   |
+| 3     | Email      | 3   | Send Email 2 (The Value + demo video link)  |
 | 4     | LinkedIn DM| 4   | Send follow-up DM (if connection accepted)  |
 | 5     | Email      | 7   | Send Email 3 (The Break-Up)                 |
 
@@ -72,22 +72,20 @@ Would it make sense to show you how it works in 15 minutes?
 
 ---
 
-### Email 2 — The Stat (Day 3)
+### Email 2 — The Value (Day 3)
 
-**Subject Line A:** `62% fewer disengaged employees`
-**Subject Line B:** `What happened after 90 days at {{company}}'s competitor`
+**Subject Line A:** `What if work felt like a game?`
+**Subject Line B:** `The engagement numbers no one expected`
 
 Hi {{first_name}},
 
 Quick follow-up. Didn't want this to get buried.
 
-One mid-size team (similar headcount to {{company}}) plugged Motivator into their daily workflows. After 90 days:
+According to Gallup, companies with high employee engagement see 23% higher profitability and 43% less turnover. The problem is most engagement tools are just surveys and dashboards — they measure the problem without fixing it.
 
-- 62% drop in disengaged employees
-- 2.4x more peer recognition
-- Voluntary turnover fell by a third
+Motivator takes a different approach: real-time gamification baked into daily work. Achievements, leaderboards, challenges, rewards — the things that actually change behavior.
 
-Here's a 3-minute video showing exactly what their setup looks like: [Demo Video Link]
+Here's a 3-minute video showing how it works: [Demo Video Link]
 
 Worth a look?
 
@@ -124,7 +122,7 @@ Either way, no hard feelings.
 >
 > I'll keep this short. I lead outreach at Motivator — we help companies with 50-500 people turn everyday work into something employees actually get excited about. Think achievements, friendly competition, real rewards. Not another survey tool.
 >
-> Teams using it are seeing engagement numbers jump within the first quarter and turnover drop meaningfully.
+> Research shows gamification drives 23% higher profitability and 43% less turnover (Gallup). We're bringing that to your daily workflows.
 >
 > I'm not going to pitch you in a DM. But if you're even slightly curious, I put together a 3-minute walkthrough that shows exactly how it works inside a real team:
 >
@@ -139,14 +137,28 @@ Either way, no hard feelings.
 Create a simple one-page site with:
 - Headline: "Turn Work Into a Game Your Team Wants to Play"
 - Embedded demo video
-- 3 outcome bullets (not features):
-  - "62% fewer disengaged employees"
-  - "2.4x more peer recognition"
-  - "Turnover drops within 90 days"
+- 3 outcome bullets (backed by industry research):
+  - "Companies with engaged teams see 23% higher profitability (Gallup)"
+  - "Gamification increases participation by up to 48% (TalentLMS)"
+  - "Recognition-rich cultures have 31% less voluntary turnover (Bersin)"
 - Calendly embed for "Book a Demo"
+- Social proof section (add logos/quotes as you get early users)
 - Company logo, dark theme matching the product
 
 Use this URL in all outreach instead of raw Railway links.
+
+---
+
+## Step 3.5: Warm Intros (Before or Alongside Cold Outreach)
+
+Warm intros convert 5-10x better than cold outreach. Before going fully cold:
+
+1. **LinkedIn mutual connections** — Check if you share connections with prospects. Ask for introductions.
+2. **Founder's network** — Personal contacts, former colleagues, friends at target companies.
+3. **Communities** — Join People Ops Slack communities, SHRM local chapters, HR Twitter/X spaces. Share value first, pitch later.
+4. **Product Hunt / Indie Hackers** — Launch for early visibility and inbound interest.
+
+Even 2-3 warm intros can generate your first paying customers faster than 50 cold emails.
 
 ---
 
