@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState, useEffect } from 'react'
 import {
   ReactFlow,
   addEdge,
@@ -8,13 +8,14 @@ import {
   Background,
   BackgroundVariant,
 } from '@xyflow/react'
-import type { Connection, ReactFlowInstance, Node, Edge } from '@xyflow/react'
+import type { Connection, ReactFlowInstance, Node, Edge, NodeChange } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
 import TriggerNode from './TriggerNode'
 import ConditionNode from './ConditionNode'
 import ActionNode from './ActionNode'
 import NodeSidebar from './NodeSidebar'
+import NodeEditPanel from './NodeEditPanel'
 
 const nodeTypes = {
   trigger: TriggerNode,
@@ -45,6 +46,36 @@ export default function FlowEditor({ initialNodes = [], initialEdges = [], onSav
   const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null)
+
+  const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    setSelectedNode(node)
+  }, [])
+
+  const onPaneClick = useCallback(() => {
+    setSelectedNode(null)
+  }, [])
+
+  const onUpdateNodeData = useCallback((nodeId: string, data: Record<string, unknown>) => {
+    setNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data } : n))
+    setSelectedNode((prev) => prev && prev.id === nodeId ? { ...prev, data } : prev)
+  }, [setNodes])
+
+  const handleNodesChange = useCallback((changes: NodeChange[]) => {
+    onNodesChange(changes)
+    const removals = changes.filter((c): c is NodeChange & { type: 'remove'; id: string } => c.type === 'remove')
+    if (selectedNode && removals.some((r) => r.id === selectedNode.id)) {
+      setSelectedNode(null)
+    }
+  }, [onNodesChange, selectedNode])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedNode(null)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#6b7280' } }, eds)),
@@ -87,12 +118,14 @@ export default function FlowEditor({ initialNodes = [], initialEdges = [], onSav
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodesChange={onNodesChange}
+          onNodesChange={handleNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onInit={setRfInstance}
           onDrop={onDrop}
           onDragOver={onDragOver}
+          onNodeClick={onNodeClick}
+          onPaneClick={onPaneClick}
           nodeTypes={nodeTypes}
           fitView
           colorMode="dark"
@@ -111,6 +144,13 @@ export default function FlowEditor({ initialNodes = [], initialEdges = [], onSav
           </button>
         </div>
       </div>
+      {selectedNode && (
+        <NodeEditPanel
+          node={selectedNode}
+          onUpdate={onUpdateNodeData}
+          onClose={() => setSelectedNode(null)}
+        />
+      )}
     </div>
   )
 }
