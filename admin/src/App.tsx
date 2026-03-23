@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import Setup from './pages/Setup'
 import Dashboard from './pages/Dashboard'
 import Company from './pages/Company'
 import Members from './pages/Members'
@@ -22,18 +23,25 @@ import Invites from './pages/Invites'
 import DocsPage from './pages/Docs'
 
 function App() {
-  const { session, loading } = useAuth()
+  const { session, loading, hasCompany, refreshMemberships } = useAuth()
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+        <div className="animate-pulse text-center">
+          <h1 className="text-xl font-bold text-white mb-2">Motivator</h1>
+          <p className="text-gray-500 text-sm">Loading...</p>
+        </div>
       </div>
     )
   }
 
   if (!session) {
     return <Login />
+  }
+
+  if (!hasCompany) {
+    return <Setup onComplete={refreshMemberships} />
   }
 
   return (
