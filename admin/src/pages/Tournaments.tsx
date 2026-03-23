@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Trophy, Plus, Trash2, Play, Check } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { CardSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface Tournament {
   id: string
@@ -27,6 +31,7 @@ const statusColors: Record<string, string> = {
 }
 
 export default function Tournaments() {
+  const navigate = useNavigate()
   const [tournaments, setTournaments] = useState<Tournament[]>([])
   const [companyId, setCompanyId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
@@ -38,6 +43,7 @@ export default function Tournaments() {
   const [endsAt, setEndsAt] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -65,27 +71,56 @@ export default function Tournaments() {
       setTournaments(prev => [t, ...prev])
       setCreating(false)
       setName(''); setMetric(''); setSeason('')
-    } catch (err: any) { setError(err.message) }
+      setToast({ message: 'Tournament created successfully', type: 'success' })
+    } catch (err: any) {
+      setError(err.message)
+      setToast({ message: err.message || 'Failed to create tournament', type: 'error' })
+    }
   }
 
   async function updateStatus(id: string, status: string) {
     if (!companyId) return
-    if (status === 'completed') {
-      await api.post(`/companies/${companyId}/tournaments/${id}/complete`)
-    } else {
-      await api.patch(`/companies/${companyId}/tournaments/${id}/status`, { status })
+    try {
+      if (status === 'completed') {
+        await api.post(`/companies/${companyId}/tournaments/${id}/complete`)
+      } else {
+        await api.patch(`/companies/${companyId}/tournaments/${id}/status`, { status })
+      }
+      load()
+      setToast({ message: `Tournament ${status === 'completed' ? 'completed' : 'status updated'}`, type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to update tournament status', type: 'error' })
     }
-    load()
   }
 
   async function handleDelete(id: string) {
     if (!companyId || !confirm('Delete this tournament?')) return
-    await api.delete(`/companies/${companyId}/tournaments/${id}`)
-    setTournaments(prev => prev.filter(t => t.id !== id))
+    try {
+      await api.delete(`/companies/${companyId}/tournaments/${id}`)
+      setTournaments(prev => prev.filter(t => t.id !== id))
+      setToast({ message: 'Tournament deleted', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to delete tournament', type: 'error' })
+    }
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
-  if (!companyId) return <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center"><p className="text-gray-400">Create a company first.</p></div>
+  if (loading) return <CardSkeleton count={3} />
+  if (!companyId) {
+    return (
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <Trophy size={24} className="text-amber-400" />
+          <h2 className="text-2xl font-bold text-white">Tournaments</h2>
+        </div>
+        <EmptyState
+          icon={Trophy}
+          title="No company yet"
+          description="Run competitive tournaments with leaderboards, seasons, and coin prize pools."
+          action={{ label: 'Create a Company', onClick: () => navigate('/company') }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -174,6 +209,8 @@ export default function Tournaments() {
           ))}
         </div>
       )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

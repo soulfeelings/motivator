@@ -2,24 +2,42 @@ import { Outlet, Link, useLocation } from 'react-router-dom'
 import { Building2, Users, Mail, LayoutDashboard, LogOut, Award, Target, Trophy, Swords, Gift, Workflow, Users2, Bell, Plug, BarChart3, Book, Heart } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
-const nav = [
+const topNav = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/company', label: 'Company', icon: Building2 },
-  { to: '/members', label: 'Members', icon: Users },
-  { to: '/badges', label: 'Badges', icon: Award },
-  { to: '/achievements', label: 'Achievements', icon: Target },
-  { to: '/leaderboard', label: 'Leaderboard', icon: Trophy },
-  { to: '/game-plans', label: 'Game Plans', icon: Workflow },
-  { to: '/teams', label: 'Teams', icon: Users2 },
-  { to: '/challenges', label: 'Challenges', icon: Swords },
-  { to: '/rewards', label: 'Rewards', icon: Gift },
-  { to: '/quests', label: 'Quests', icon: Heart },
-  { to: '/tournaments', label: 'Tournaments', icon: Trophy },
-  { to: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { to: '/integrations', label: 'Integrations', icon: Plug },
-  { to: '/webhooks', label: 'Webhooks', icon: Bell },
-  { to: '/invites', label: 'Invites', icon: Mail },
-  { to: '/docs', label: 'Docs', icon: Book },
+]
+
+const navGroups = [
+  {
+    label: 'Company',
+    items: [
+      { to: '/company', label: 'Company', icon: Building2 },
+      { to: '/members', label: 'Members', icon: Users },
+      { to: '/teams', label: 'Teams', icon: Users2 },
+      { to: '/invites', label: 'Invites', icon: Mail },
+    ],
+  },
+  {
+    label: 'Gamification',
+    items: [
+      { to: '/badges', label: 'Badges', icon: Award },
+      { to: '/achievements', label: 'Achievements', icon: Target },
+      { to: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+      { to: '/game-plans', label: 'Game Plans', icon: Workflow },
+      { to: '/challenges', label: 'Challenges', icon: Swords },
+      { to: '/rewards', label: 'Rewards', icon: Gift },
+      { to: '/quests', label: 'Quests', icon: Heart },
+      { to: '/tournaments', label: 'Tournaments', icon: Trophy },
+    ],
+  },
+  {
+    label: 'Settings',
+    items: [
+      { to: '/analytics', label: 'Analytics', icon: BarChart3 },
+      { to: '/integrations', label: 'Integrations', icon: Plug },
+      { to: '/webhooks', label: 'Webhooks', icon: Bell },
+      { to: '/docs', label: 'Docs', icon: Book },
+    ],
+  },
 ]
 
 export default function Layout() {
@@ -33,8 +51,8 @@ export default function Layout() {
           <h1 className="text-xl font-bold tracking-tight text-white">Motivator</h1>
           <p className="text-xs text-gray-500 mt-1">Admin Panel</p>
         </div>
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-          {nav.map(({ to, label, icon: Icon }) => {
+        <nav className="flex-1 overflow-y-auto p-4">
+          {topNav.map(({ to, label, icon: Icon }) => {
             const active = pathname === to
             return (
               <Link
@@ -51,6 +69,32 @@ export default function Layout() {
               </Link>
             )
           })}
+          {navGroups.map((group) => (
+            <div key={group.label} className="mt-6">
+              <div className="px-3 mb-2 text-xs text-gray-600 uppercase tracking-wider font-semibold">
+                {group.label}
+              </div>
+              <div className="space-y-1">
+                {group.items.map(({ to, label, icon: Icon }) => {
+                  const active = pathname === to
+                  return (
+                    <Link
+                      key={to}
+                      to={to}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        active
+                          ? 'bg-violet-600/20 text-violet-400'
+                          : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
+                      }`}
+                    >
+                      <Icon size={18} />
+                      {label}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
         <div className="p-4 border-t border-gray-800">
           <div className="text-xs text-gray-500 truncate mb-3">{session?.user?.email}</div>

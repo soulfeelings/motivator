@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Workflow, Plus, Trash2, Play, Pause, Pencil } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { CardSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface GamePlan {
   id: string
@@ -25,6 +28,7 @@ export default function GamePlans() {
   const [description, setDescription] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => {
     load()
@@ -55,30 +59,51 @@ export default function GamePlans() {
         name,
         description: description || undefined,
       })
+      setToast({ message: 'Game plan created', type: 'success' })
       navigate(`/game-plans/${plan.id}`)
     } catch (err: any) {
       setError(err.message)
+      setToast({ message: err.message || 'Failed to create game plan', type: 'error' })
     }
   }
 
   async function toggleActive(plan: GamePlan) {
     if (!companyId) return
-    const endpoint = plan.is_active ? 'deactivate' : 'activate'
-    await api.post(`/companies/${companyId}/game-plans/${plan.id}/${endpoint}`)
-    setPlans((prev) => prev.map((p) => (p.id === plan.id ? { ...p, is_active: !p.is_active } : p)))
+    try {
+      const endpoint = plan.is_active ? 'deactivate' : 'activate'
+      await api.post(`/companies/${companyId}/game-plans/${plan.id}/${endpoint}`)
+      setPlans((prev) => prev.map((p) => (p.id === plan.id ? { ...p, is_active: !p.is_active } : p)))
+      setToast({ message: plan.is_active ? 'Game plan deactivated' : 'Game plan activated', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to update game plan', type: 'error' })
+    }
   }
 
   async function handleDelete(id: string) {
     if (!companyId || !confirm('Delete this game plan?')) return
-    await api.delete(`/companies/${companyId}/game-plans/${id}`)
-    setPlans((prev) => prev.filter((p) => p.id !== id))
+    try {
+      await api.delete(`/companies/${companyId}/game-plans/${id}`)
+      setPlans((prev) => prev.filter((p) => p.id !== id))
+      setToast({ message: 'Game plan deleted', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to delete game plan', type: 'error' })
+    }
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
+  if (loading) return <CardSkeleton count={3} />
   if (!companyId) {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-        <p className="text-gray-400">Create a company first.</p>
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <Workflow size={24} className="text-violet-400" />
+          <h2 className="text-2xl font-bold text-white">Game Plans</h2>
+        </div>
+        <EmptyState
+          icon={Workflow}
+          title="No company yet"
+          description="Design visual gamification flows that connect triggers, rules, and rewards together."
+          action={{ label: 'Create a Company', onClick: () => navigate('/company') }}
+        />
       </div>
     )
   }
@@ -177,6 +202,8 @@ export default function GamePlans() {
           ))}
         </div>
       )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

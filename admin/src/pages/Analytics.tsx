@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { BarChart3, Users, Zap, Coins, Award, Target, Swords, Gift } from 'lucide-react'
+import { StatSkeleton } from '../components/LoadingSkeleton'
 
 interface Overview {
   total_members: number
@@ -79,7 +80,7 @@ export default function Analytics() {
     } catch {} finally { setLoading(false) }
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
+  if (loading) return <StatSkeleton />
   if (!data) return <p className="text-gray-500">No data available.</p>
 
   const o = data.overview

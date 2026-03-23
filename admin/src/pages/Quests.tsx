@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Heart, Plus, Trash2, Play, Eye, Vote, Check } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { CardSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface Quest {
   id: string
@@ -39,6 +43,7 @@ const statusColors: Record<string, string> = {
 }
 
 export default function Quests() {
+  const navTo = useNavigate()
   const [quests, setQuests] = useState<Quest[]>([])
   const [companyId, setCompanyId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
@@ -48,6 +53,7 @@ export default function Quests() {
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [pairs, setPairs] = useState<QuestPair[]>([])
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -73,7 +79,11 @@ export default function Quests() {
       })
       setQuests(prev => [q, ...prev])
       setCreating(false)
-    } catch (err: any) { setError(err.message) }
+      setToast({ message: 'Quest created successfully', type: 'success' })
+    } catch (err: any) {
+      setError(err.message)
+      setToast({ message: err.message || 'Failed to create quest', type: 'error' })
+    }
   }
 
   async function handleAction(questId: string, action: string) {
@@ -81,14 +91,23 @@ export default function Quests() {
     try {
       await api.post(`/companies/${companyId}/quests/${questId}/${action}`)
       load()
-    } catch (err: any) { setError(err.message) }
+      setToast({ message: `Quest ${action} successful`, type: 'success' })
+    } catch (err: any) {
+      setError(err.message)
+      setToast({ message: err.message || `Failed to ${action} quest`, type: 'error' })
+    }
   }
 
   async function handleDelete(id: string) {
     if (!companyId || !confirm('Delete this quest?')) return
-    await api.delete(`/companies/${companyId}/quests/${id}`)
-    setQuests(prev => prev.filter(q => q.id !== id))
-    if (selectedId === id) { setSelectedId(null); setPairs([]) }
+    try {
+      await api.delete(`/companies/${companyId}/quests/${id}`)
+      setQuests(prev => prev.filter(q => q.id !== id))
+      if (selectedId === id) { setSelectedId(null); setPairs([]) }
+      setToast({ message: 'Quest deleted', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to delete quest', type: 'error' })
+    }
   }
 
   async function loadPairs(questId: string) {
@@ -98,8 +117,23 @@ export default function Quests() {
     setPairs(res ?? [])
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
-  if (!companyId) return <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center"><p className="text-gray-400">Create a company first.</p></div>
+  if (loading) return <CardSkeleton count={3} />
+  if (!companyId) {
+    return (
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <Heart size={24} className="text-pink-400" />
+          <h2 className="text-2xl font-bold text-white">Secret Motivator</h2>
+        </div>
+        <EmptyState
+          icon={Heart}
+          title="No company yet"
+          description="Launch anonymous appreciation quests where teammates send positive messages to each other."
+          action={{ label: 'Create a Company', onClick: () => navTo('/company') }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -194,6 +228,8 @@ export default function Quests() {
           </div>
         )}
       </div>
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

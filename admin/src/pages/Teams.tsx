@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Users2, Plus, Trash2, Swords } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { CardSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface Team {
   id: string
@@ -31,6 +35,7 @@ interface MeResponse {
 }
 
 export default function Teams() {
+  const navigate = useNavigate()
   const [teams, setTeams] = useState<Team[]>([])
   const [battles, setBattles] = useState<TeamBattle[]>([])
   const [companyId, setCompanyId] = useState<string | null>(null)
@@ -45,6 +50,7 @@ export default function Teams() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'teams' | 'battles'>('teams')
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => {
     load()
@@ -79,8 +85,10 @@ export default function Teams() {
       setTeams((prev) => [...prev, team])
       setCreating(false)
       setName('')
+      setToast({ message: 'Team created successfully', type: 'success' })
     } catch (err: any) {
       setError(err.message)
+      setToast({ message: err.message || 'Failed to create team', type: 'error' })
     }
   }
 
@@ -97,21 +105,43 @@ export default function Teams() {
       })
       setBattles((prev) => [battle, ...prev])
       setCreatingBattle(false)
+      setToast({ message: 'Battle created successfully', type: 'success' })
     } catch (err: any) {
       setError(err.message)
+      setToast({ message: err.message || 'Failed to create battle', type: 'error' })
     }
   }
 
   async function handleDeleteTeam(id: string) {
     if (!companyId || !confirm('Delete this team?')) return
-    await api.delete(`/companies/${companyId}/teams/${id}`)
-    setTeams((prev) => prev.filter((t) => t.id !== id))
+    try {
+      await api.delete(`/companies/${companyId}/teams/${id}`)
+      setTeams((prev) => prev.filter((t) => t.id !== id))
+      setToast({ message: 'Team deleted', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to delete team', type: 'error' })
+    }
   }
 
   const teamName = (id: string) => teams.find((t) => t.id === id)?.name ?? id.slice(0, 8)
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
-  if (!companyId) return <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center"><p className="text-gray-400">Create a company first.</p></div>
+  if (loading) return <CardSkeleton count={3} />
+  if (!companyId) {
+    return (
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <Users2 size={24} className="text-blue-400" />
+          <h2 className="text-2xl font-bold text-white">Teams</h2>
+        </div>
+        <EmptyState
+          icon={Users2}
+          title="No company yet"
+          description="Organize employees into teams and launch head-to-head team battles."
+          action={{ label: 'Create a Company', onClick: () => navigate('/company') }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -247,6 +277,8 @@ export default function Teams() {
           )}
         </>
       )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Award, Plus, Trash2 } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { CardSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface Badge {
   id: string
@@ -17,6 +21,7 @@ interface MeResponse {
 }
 
 export default function Badges() {
+  const navigate = useNavigate()
   const [badges, setBadges] = useState<Badge[]>([])
   const [companyId, setCompanyId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
@@ -26,6 +31,7 @@ export default function Badges() {
   const [coinReward, setCoinReward] = useState(5)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => {
     load()
@@ -64,22 +70,35 @@ export default function Badges() {
       setDescription('')
       setXpReward(10)
       setCoinReward(5)
+      setToast({ message: 'Badge created successfully', type: 'success' })
     } catch (err: any) {
       setError(err.message)
+      setToast({ message: err.message || 'Failed to create badge', type: 'error' })
     }
   }
 
   async function handleDelete(badgeId: string) {
     if (!companyId || !confirm('Delete this badge?')) return
-    await api.delete(`/companies/${companyId}/badges/${badgeId}`)
-    setBadges((prev) => prev.filter((b) => b.id !== badgeId))
+    try {
+      await api.delete(`/companies/${companyId}/badges/${badgeId}`)
+      setBadges((prev) => prev.filter((b) => b.id !== badgeId))
+      setToast({ message: 'Badge deleted', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to delete badge', type: 'error' })
+    }
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
+  if (loading) return <CardSkeleton count={3} />
   if (!companyId) {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-        <p className="text-gray-400">Create a company first.</p>
+      <div>
+        <h2 className="text-2xl font-bold text-white mb-6">Badges</h2>
+        <EmptyState
+          icon={Award}
+          title="No company yet"
+          description="Create badges to reward your team for hitting milestones and going above and beyond."
+          action={{ label: 'Create a Company', onClick: () => navigate('/company') }}
+        />
       </div>
     )
   }
@@ -186,6 +205,8 @@ export default function Badges() {
           ))}
         </div>
       )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

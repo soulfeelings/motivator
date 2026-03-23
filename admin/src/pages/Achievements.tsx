@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Target, Plus, Trash2 } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { CardSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface Badge {
   id: string
@@ -34,6 +38,7 @@ const operatorLabels: Record<string, string> = {
 }
 
 export default function Achievements() {
+  const navigate = useNavigate()
   const [achievements, setAchievements] = useState<Achievement[]>([])
   const [badges, setBadges] = useState<Badge[]>([])
   const [companyId, setCompanyId] = useState<string | null>(null)
@@ -48,6 +53,7 @@ export default function Achievements() {
   const [coinReward, setCoinReward] = useState(10)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => {
     load()
@@ -95,22 +101,35 @@ export default function Achievements() {
       setMetric('')
       setThreshold(1)
       setBadgeId('')
+      setToast({ message: 'Achievement created successfully', type: 'success' })
     } catch (err: any) {
       setError(err.message)
+      setToast({ message: err.message || 'Failed to create achievement', type: 'error' })
     }
   }
 
   async function handleDelete(id: string) {
     if (!companyId || !confirm('Delete this achievement?')) return
-    await api.delete(`/companies/${companyId}/achievements/${id}`)
-    setAchievements((prev) => prev.filter((a) => a.id !== id))
+    try {
+      await api.delete(`/companies/${companyId}/achievements/${id}`)
+      setAchievements((prev) => prev.filter((a) => a.id !== id))
+      setToast({ message: 'Achievement deleted', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to delete achievement', type: 'error' })
+    }
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
+  if (loading) return <CardSkeleton count={4} />
   if (!companyId) {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-        <p className="text-gray-400">Create a company first.</p>
+      <div>
+        <h2 className="text-2xl font-bold text-white mb-6">Achievements</h2>
+        <EmptyState
+          icon={Target}
+          title="No company yet"
+          description="Set up achievement rules tied to work metrics so your team earns rewards automatically."
+          action={{ label: 'Create a Company', onClick: () => navigate('/company') }}
+        />
       </div>
     )
   }
@@ -271,6 +290,8 @@ export default function Achievements() {
           ))}
         </div>
       )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

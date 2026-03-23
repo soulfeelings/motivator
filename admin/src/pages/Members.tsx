@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { Shield, UserX, Zap, Coins, UserPlus } from 'lucide-react'
+import { TableSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface Member {
   id: string
@@ -37,6 +39,7 @@ export default function Members() {
   const [role, setRole] = useState('employee')
   const [error, setError] = useState('')
   const [addLoading, setAddLoading] = useState(false)
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => {
     loadMembers()
@@ -76,8 +79,10 @@ export default function Members() {
       setDisplayName('')
       setRole('employee')
       loadMembers()
+      setToast({ message: 'Member added successfully', type: 'success' })
     } catch (err: any) {
       setError(err.message)
+      setToast({ message: err.message || 'Failed to add member', type: 'error' })
     } finally {
       setAddLoading(false)
     }
@@ -85,11 +90,16 @@ export default function Members() {
 
   async function deactivate(memberId: string) {
     if (!companyId || !confirm('Remove this member?')) return
-    await api.delete(`/companies/${companyId}/members/${memberId}`)
-    setMembers((prev) => prev.filter((m) => m.id !== memberId))
+    try {
+      await api.delete(`/companies/${companyId}/members/${memberId}`)
+      setMembers((prev) => prev.filter((m) => m.id !== memberId))
+      setToast({ message: 'Member removed', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to remove member', type: 'error' })
+    }
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
+  if (loading) return <TableSkeleton rows={5} cols={6} />
 
   return (
     <div>
@@ -236,6 +246,8 @@ export default function Members() {
           </table>
         </div>
       )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

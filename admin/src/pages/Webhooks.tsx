@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Bell, Plus, Trash2 } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { CardSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface Webhook {
   id: string
@@ -21,6 +25,7 @@ const eventOptions = [
 ]
 
 export default function Webhooks() {
+  const navigate = useNavigate()
   const [webhooks, setWebhooks] = useState<Webhook[]>([])
   const [companyId, setCompanyId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
@@ -30,6 +35,7 @@ export default function Webhooks() {
   const [events, setEvents] = useState<string[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -54,21 +60,45 @@ export default function Webhooks() {
       setWebhooks(prev => [...prev, w])
       setCreating(false)
       setName(''); setUrl(''); setEvents([])
-    } catch (err: any) { setError(err.message) }
+      setToast({ message: 'Webhook created successfully', type: 'success' })
+    } catch (err: any) {
+      setError(err.message)
+      setToast({ message: err.message || 'Failed to create webhook', type: 'error' })
+    }
   }
 
   async function handleDelete(id: string) {
     if (!companyId || !confirm('Delete this webhook?')) return
-    await api.delete(`/companies/${companyId}/webhooks/${id}`)
-    setWebhooks(prev => prev.filter(w => w.id !== id))
+    try {
+      await api.delete(`/companies/${companyId}/webhooks/${id}`)
+      setWebhooks(prev => prev.filter(w => w.id !== id))
+      setToast({ message: 'Webhook deleted', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to delete webhook', type: 'error' })
+    }
   }
 
   function toggleEvent(event: string) {
     setEvents(prev => prev.includes(event) ? prev.filter(e => e !== event) : [...prev, event])
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
-  if (!companyId) return <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center"><p className="text-gray-400">Create a company first.</p></div>
+  if (loading) return <CardSkeleton count={3} />
+  if (!companyId) {
+    return (
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <Bell size={24} className="text-blue-400" />
+          <h2 className="text-2xl font-bold text-white">Webhooks</h2>
+        </div>
+        <EmptyState
+          icon={Bell}
+          title="No company yet"
+          description="Send real-time notifications to Slack or Teams when achievements, badges, and rewards are triggered."
+          action={{ label: 'Create a Company', onClick: () => navigate('/company') }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -144,6 +174,8 @@ export default function Webhooks() {
           ))}
         </div>
       )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

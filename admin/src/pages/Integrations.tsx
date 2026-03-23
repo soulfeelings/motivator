@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Plug, Plus, Trash2, ArrowRight, Copy, Check } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { CardSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface Integration {
   id: string
@@ -43,6 +47,7 @@ const providers = [
 ]
 
 export default function Integrations() {
+  const navigate = useNavigate()
   const [integrations, setIntegrations] = useState<Integration[]>([])
   const [companyId, setCompanyId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
@@ -56,6 +61,7 @@ export default function Integrations() {
   const [newEvent, setNewEvent] = useState('')
   const [newMetric, setNewMetric] = useState('')
   const [copied, setCopied] = useState(false)
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -82,7 +88,11 @@ export default function Integrations() {
       setName('')
       setSelectedId(i.id)
       loadDetail(i.id)
-    } catch (err: any) { setError(err.message) }
+      setToast({ message: 'Integration created successfully', type: 'success' })
+    } catch (err: any) {
+      setError(err.message)
+      setToast({ message: err.message || 'Failed to create integration', type: 'error' })
+    }
   }
 
   async function loadDetail(id: string) {
@@ -97,25 +107,40 @@ export default function Integrations() {
 
   async function addMapping() {
     if (!companyId || !selectedId || !newEvent || !newMetric) return
-    const m = await api.post<Mapping>(`/companies/${companyId}/integrations/${selectedId}/mappings`, {
-      external_event: newEvent, metric: newMetric, transform: { value: 1 },
-    })
-    setMappings(prev => [...prev, m])
-    setNewEvent('')
-    setNewMetric('')
+    try {
+      const m = await api.post<Mapping>(`/companies/${companyId}/integrations/${selectedId}/mappings`, {
+        external_event: newEvent, metric: newMetric, transform: { value: 1 },
+      })
+      setMappings(prev => [...prev, m])
+      setNewEvent('')
+      setNewMetric('')
+      setToast({ message: 'Mapping added', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to add mapping', type: 'error' })
+    }
   }
 
   async function deleteMapping(id: string) {
     if (!companyId || !selectedId) return
-    await api.delete(`/companies/${companyId}/integrations/${selectedId}/mappings/${id}`)
-    setMappings(prev => prev.filter(m => m.id !== id))
+    try {
+      await api.delete(`/companies/${companyId}/integrations/${selectedId}/mappings/${id}`)
+      setMappings(prev => prev.filter(m => m.id !== id))
+      setToast({ message: 'Mapping removed', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to remove mapping', type: 'error' })
+    }
   }
 
   async function handleDelete(id: string) {
     if (!companyId || !confirm('Delete this integration?')) return
-    await api.delete(`/companies/${companyId}/integrations/${id}`)
-    setIntegrations(prev => prev.filter(i => i.id !== id))
-    if (selectedId === id) { setSelectedId(null); setMappings([]); setEvents([]) }
+    try {
+      await api.delete(`/companies/${companyId}/integrations/${id}`)
+      setIntegrations(prev => prev.filter(i => i.id !== id))
+      if (selectedId === id) { setSelectedId(null); setMappings([]); setEvents([]) }
+      setToast({ message: 'Integration deleted', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to delete integration', type: 'error' })
+    }
   }
 
   function copyWebhookUrl(secret: string) {
@@ -127,8 +152,23 @@ export default function Integrations() {
   const selected = integrations.find(i => i.id === selectedId)
   const providerInfo = providers.find(p => p.id === selected?.provider)
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
-  if (!companyId) return <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center"><p className="text-gray-400">Create a company first.</p></div>
+  if (loading) return <CardSkeleton count={3} />
+  if (!companyId) {
+    return (
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <Plug size={24} className="text-violet-400" />
+          <h2 className="text-2xl font-bold text-white">Integrations</h2>
+        </div>
+        <EmptyState
+          icon={Plug}
+          title="No company yet"
+          description="Connect tools like Jira, GitHub, and Salesforce to automatically track work metrics."
+          action={{ label: 'Create a Company', onClick: () => navigate('/company') }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -248,6 +288,8 @@ export default function Integrations() {
           </div>
         )}
       </div>
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

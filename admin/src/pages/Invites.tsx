@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Send, X, Clock, Check, Ban } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { TableSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface Invite {
   id: string
@@ -24,6 +28,7 @@ const statusStyle: Record<string, { icon: typeof Clock; class: string }> = {
 }
 
 export default function Invites() {
+  const navigate = useNavigate()
   const [invites, setInvites] = useState<Invite[]>([])
   const [companyId, setCompanyId] = useState<string | null>(null)
   const [email, setEmail] = useState('')
@@ -31,6 +36,7 @@ export default function Invites() {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => {
     load()
@@ -61,8 +67,10 @@ export default function Invites() {
       const invite = await api.post<Invite>(`/companies/${companyId}/invites`, { email, role })
       setInvites((prev) => [invite, ...prev])
       setEmail('')
+      setToast({ message: `Invite sent to ${email}`, type: 'success' })
     } catch (err: any) {
       setError(err.message)
+      setToast({ message: err.message || 'Failed to send invite', type: 'error' })
     } finally {
       setSending(false)
     }
@@ -70,15 +78,26 @@ export default function Invites() {
 
   async function revoke(inviteId: string) {
     if (!companyId || !confirm('Revoke this invite?')) return
-    await api.delete(`/companies/${companyId}/invites/${inviteId}`)
-    setInvites((prev) => prev.map((i) => (i.id === inviteId ? { ...i, status: 'revoked' } : i)))
+    try {
+      await api.delete(`/companies/${companyId}/invites/${inviteId}`)
+      setInvites((prev) => prev.map((i) => (i.id === inviteId ? { ...i, status: 'revoked' } : i)))
+      setToast({ message: 'Invite revoked', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to revoke invite', type: 'error' })
+    }
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
+  if (loading) return <TableSkeleton rows={5} cols={5} />
   if (!companyId) {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-        <p className="text-gray-400">Create a company first before sending invites.</p>
+      <div>
+        <h2 className="text-2xl font-bold text-white mb-6">Invites</h2>
+        <EmptyState
+          icon={Send}
+          title="No company yet"
+          description="Invite team members by email so they can join your company and start earning XP."
+          action={{ label: 'Create a Company', onClick: () => navigate('/company') }}
+        />
       </div>
     )
   }
@@ -175,6 +194,8 @@ export default function Invites() {
           </table>
         </div>
       )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

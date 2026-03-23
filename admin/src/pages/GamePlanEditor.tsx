@@ -4,6 +4,8 @@ import { api } from '../lib/api'
 import FlowEditor from '../components/flow/FlowEditor'
 import { ArrowLeft } from 'lucide-react'
 import type { Node, Edge } from '@xyflow/react'
+import { CardSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface GamePlan {
   id: string
@@ -24,6 +26,7 @@ export default function GamePlanEditor() {
   const [companyId, setCompanyId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => {
     load()
@@ -59,14 +62,16 @@ export default function GamePlanEditor() {
       await api.patch(`/companies/${companyId}/game-plans/${planId}`, {
         flow_data: { nodes, edges },
       })
-    } catch (err) {
+      setToast({ message: 'Game plan saved', type: 'success' })
+    } catch (err: any) {
       console.error('Failed to save:', err)
+      setToast({ message: err.message || 'Failed to save game plan', type: 'error' })
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
+  if (loading) return <CardSkeleton count={1} />
   if (!plan) return <p className="text-gray-500">Game plan not found.</p>
 
   return (
@@ -96,6 +101,7 @@ export default function GamePlanEditor() {
         onSave={handleSave}
         saving={saving}
       />
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

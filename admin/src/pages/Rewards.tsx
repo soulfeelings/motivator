@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Gift, Plus, Trash2, Check, Clock } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { CardSkeleton } from '../components/LoadingSkeleton'
+import Toast from '../components/Toast'
 
 interface Reward {
   id: string
@@ -26,6 +30,7 @@ interface MeResponse {
 }
 
 export default function Rewards() {
+  const navigate = useNavigate()
   const [rewards, setRewards] = useState<Reward[]>([])
   const [redemptions, setRedemptions] = useState<Redemption[]>([])
   const [companyId, setCompanyId] = useState<string | null>(null)
@@ -37,6 +42,7 @@ export default function Rewards() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'rewards' | 'redemptions'>('rewards')
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null)
 
   useEffect(() => {
     load()
@@ -79,30 +85,51 @@ export default function Rewards() {
       setDescription('')
       setCostCoins(100)
       setStock('')
+      setToast({ message: 'Reward created successfully', type: 'success' })
     } catch (err: any) {
       setError(err.message)
+      setToast({ message: err.message || 'Failed to create reward', type: 'error' })
     }
   }
 
   async function handleDelete(id: string) {
     if (!companyId || !confirm('Remove this reward?')) return
-    await api.delete(`/companies/${companyId}/rewards/${id}`)
-    setRewards((prev) => prev.filter((r) => r.id !== id))
+    try {
+      await api.delete(`/companies/${companyId}/rewards/${id}`)
+      setRewards((prev) => prev.filter((r) => r.id !== id))
+      setToast({ message: 'Reward removed', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to remove reward', type: 'error' })
+    }
   }
 
   async function handleFulfill(redemptionId: string) {
     if (!companyId) return
-    await api.post(`/companies/${companyId}/rewards/redemptions/${redemptionId}/fulfill`)
-    setRedemptions((prev) =>
-      prev.map((r) => (r.id === redemptionId ? { ...r, status: 'fulfilled' } : r))
-    )
+    try {
+      await api.post(`/companies/${companyId}/rewards/redemptions/${redemptionId}/fulfill`)
+      setRedemptions((prev) =>
+        prev.map((r) => (r.id === redemptionId ? { ...r, status: 'fulfilled' } : r))
+      )
+      setToast({ message: 'Redemption fulfilled', type: 'success' })
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to fulfill redemption', type: 'error' })
+    }
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
+  if (loading) return <CardSkeleton count={3} />
   if (!companyId) {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-        <p className="text-gray-400">Create a company first.</p>
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <Gift size={24} className="text-amber-400" />
+          <h2 className="text-2xl font-bold text-white">Reward Store</h2>
+        </div>
+        <EmptyState
+          icon={Gift}
+          title="No company yet"
+          description="Set up a reward store where employees spend earned coins on real perks and prizes."
+          action={{ label: 'Create a Company', onClick: () => navigate('/company') }}
+        />
       </div>
     )
   }
@@ -284,6 +311,8 @@ export default function Rewards() {
           )}
         </>
       )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

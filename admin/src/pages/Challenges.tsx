@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Swords, Clock, Check, X } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { CardSkeleton } from '../components/LoadingSkeleton'
 
 interface Challenge {
   id: string
@@ -30,6 +33,7 @@ const statusStyle: Record<string, { icon: typeof Clock; class: string }> = {
 }
 
 export default function Challenges() {
+  const navigate = useNavigate()
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [companyId, setCompanyId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -54,11 +58,20 @@ export default function Challenges() {
     }
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
+  if (loading) return <CardSkeleton count={4} />
   if (!companyId) {
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center">
-        <p className="text-gray-400">Create a company first.</p>
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <Swords size={24} className="text-violet-400" />
+          <h2 className="text-2xl font-bold text-white">1v1 Challenges</h2>
+        </div>
+        <EmptyState
+          icon={Swords}
+          title="No company yet"
+          description="View 1v1 challenges where employees compete head-to-head on specific metrics."
+          action={{ label: 'Create a Company', onClick: () => navigate('/company') }}
+        />
       </div>
     )
   }

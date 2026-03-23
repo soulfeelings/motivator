@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Trophy, Zap, Coins } from 'lucide-react'
+import EmptyState from '../components/EmptyState'
+import { TableSkeleton } from '../components/LoadingSkeleton'
 
 interface LeaderEntry {
   rank: number
@@ -20,7 +23,9 @@ interface MeResponse {
 const medalColors = ['text-yellow-400', 'text-gray-400', 'text-amber-600']
 
 export default function Leaderboard() {
+  const navigate = useNavigate()
   const [entries, setEntries] = useState<LeaderEntry[]>([])
+  const [companyId, setCompanyId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -32,6 +37,7 @@ export default function Leaderboard() {
       const me = await api.get<MeResponse>('/me')
       if (me.memberships?.length > 0) {
         const cid = me.memberships[0].company_id
+        setCompanyId(cid)
         const res = await api.get<LeaderEntry[]>(`/companies/${cid}/leaderboard?limit=50`)
         setEntries(res ?? [])
       }
@@ -42,7 +48,23 @@ export default function Leaderboard() {
     }
   }
 
-  if (loading) return <p className="text-gray-500">Loading...</p>
+  if (loading) return <TableSkeleton rows={8} cols={4} />
+  if (!companyId) {
+    return (
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <Trophy size={24} className="text-yellow-400" />
+          <h2 className="text-2xl font-bold text-white">Leaderboard</h2>
+        </div>
+        <EmptyState
+          icon={Trophy}
+          title="No company yet"
+          description="See how your team ranks by XP and track top performers in real time."
+          action={{ label: 'Create a Company', onClick: () => navigate('/company') }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div>
