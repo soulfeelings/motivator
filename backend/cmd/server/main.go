@@ -71,6 +71,8 @@ func main() {
 	analyticsSvc := service.NewAnalyticsService(analyticsRepo)
 	questRepo := repository.NewQuestRepository(pool)
 	questSvc := service.NewQuestService(questRepo, memberRepo)
+	socialGameRepo := repository.NewSocialGameRepository(pool)
+	socialGameSvc := service.NewSocialGameService(socialGameRepo, memberRepo)
 
 	// Handlers
 	handlers := handler.Handlers{
@@ -90,6 +92,7 @@ func main() {
 		Integration:  handler.NewIntegrationHandler(integrationSvc),
 		Analytics:    handler.NewAnalyticsHandler(analyticsSvc),
 		Quest:        handler.NewQuestHandler(questSvc),
+		SocialGame:   handler.NewSocialGameHandler(socialGameSvc),
 	}
 
 	// Middleware

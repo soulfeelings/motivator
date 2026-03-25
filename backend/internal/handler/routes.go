@@ -24,6 +24,7 @@ type Handlers struct {
 	Integration  *IntegrationHandler
 	Analytics    *AnalyticsHandler
 	Quest        *QuestHandler
+	SocialGame   *SocialGameHandler
 }
 
 func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware, rbac *middleware.RBACMiddleware) {
@@ -163,6 +164,22 @@ func RegisterRoutes(app *fiber.App, h Handlers, auth *middleware.AuthMiddleware,
 	company.Post("/quests/:questId/reveal", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Quest.Reveal)
 	company.Post("/quests/:questId/complete", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Quest.Complete)
 	company.Get("/quests/:questId/pairs", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.Quest.ListPairs)
+
+	// Social Games
+	company.Get("/social-games", h.SocialGame.List)
+	company.Post("/social-games", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.SocialGame.Create)
+	company.Get("/social-games/:gameId", h.SocialGame.GetByID)
+	company.Delete("/social-games/:gameId", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.SocialGame.Delete)
+	company.Post("/social-games/:gameId/questions", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.SocialGame.AddQuestion)
+	company.Get("/social-games/:gameId/questions", h.SocialGame.ListQuestions)
+	company.Post("/social-games/:gameId/launch", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.SocialGame.Launch)
+	company.Post("/social-games/:gameId/voting", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.SocialGame.StartVoting)
+	company.Post("/social-games/:gameId/complete", middleware.RequireRole(model.RoleOwner, model.RoleAdmin), h.SocialGame.Complete)
+	company.Post("/social-games/:gameId/answer", h.SocialGame.SubmitAnswer)
+	company.Post("/social-games/:gameId/submit", h.SocialGame.SubmitEntry)
+	company.Post("/social-games/:gameId/vote", h.SocialGame.CastVote)
+	company.Get("/social-games/:gameId/results", h.SocialGame.GetResults)
+	company.Get("/social-games/:gameId/submissions", h.SocialGame.ListSubmissions)
 
 	// Accept invite (auth required, but no company membership needed)
 	protected.Post("/invites/:token/accept", h.Invite.Accept)

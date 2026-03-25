@@ -21,6 +21,9 @@ import Integrations from './pages/Integrations'
 import Webhooks from './pages/Webhooks'
 import Invites from './pages/Invites'
 import DocsPage from './pages/Docs'
+import SocialGames from './pages/SocialGames'
+import SocialGameDetail from './pages/SocialGameDetail'
+import Play from './pages/Play'
 
 function App() {
   const { session, loading, hasCompany, refreshMemberships } = useAuth()
@@ -47,6 +50,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/play/:gameId" element={<Play />} />
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/company" element={<Company />} />
@@ -65,6 +69,8 @@ function App() {
           <Route path="/integrations" element={<Integrations />} />
           <Route path="/webhooks" element={<Webhooks />} />
           <Route path="/invites" element={<Invites />} />
+          <Route path="/social-games" element={<SocialGames />} />
+          <Route path="/social-games/:gameId" element={<SocialGameDetail />} />
           <Route path="/docs" element={<DocsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
