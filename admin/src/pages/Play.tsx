@@ -25,8 +25,13 @@ interface Submission {
   vote_count: number
 }
 
+interface MeResponse {
+  memberships: Array<{ company_id: string }>
+}
+
 export default function Play() {
   const { gameId } = useParams<{ gameId: string }>()
+  const [companyId, setCompanyId] = useState('')
   const [game, setGame] = useState<SocialGame | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -54,21 +59,26 @@ export default function Play() {
 
   async function load() {
     try {
-      const g = await api.get<SocialGame>(`/social-games/${gameId}`)
+      const me = await api.get<MeResponse>('/me')
+      if (!me.memberships?.length) { setError('No company found'); setLoading(false); return }
+      const cid = me.memberships[0].company_id
+      setCompanyId(cid)
+
+      const g = await api.get<SocialGame>(`/companies/${cid}/social-games/${gameId}`)
       setGame(g)
 
       if (g.game_type === 'trivia') {
-        const qs = await api.get<TriviaQuestion[]>(`/social-games/${gameId}/questions`)
+        const qs = await api.get<TriviaQuestion[]>(`/companies/${cid}/social-games/${gameId}/questions`)
         setQuestions(qs ?? [])
       }
 
       if (g.game_type === 'two_truths' && g.status === 'voting') {
-        const subs = await api.get<Submission[]>(`/social-games/${gameId}/submissions`)
+        const subs = await api.get<Submission[]>(`/companies/${cid}/social-games/${gameId}/submissions`)
         setOtherSubmissions(subs ?? [])
       }
 
       if (g.game_type === 'photo_challenge' && g.status === 'voting') {
-        const subs = await api.get<Submission[]>(`/social-games/${gameId}/submissions`)
+        const subs = await api.get<Submission[]>(`/companies/${cid}/social-games/${gameId}/submissions`)
         setGallery(subs ?? [])
       }
     } catch (err: any) {
@@ -97,7 +107,7 @@ export default function Play() {
   async function handleTwoTruthsSubmit(e: React.FormEvent) {
     e.preventDefault()
     try {
-      await api.post(`/social-games/${gameId}/submissions`, {
+      await api.post(`/companies/${companyId}/social-games/${gameId}/submit`, {
         statements,
         lie_index: lieIndex,
       })
@@ -110,7 +120,7 @@ export default function Play() {
   async function handlePhotoSubmit(e: React.FormEvent) {
     e.preventDefault()
     try {
-      await api.post(`/social-games/${gameId}/submissions`, {
+      await api.post(`/companies/${companyId}/social-games/${gameId}/submit`, {
         content: photoUrl,
       })
       setPhotoSubmitted(true)
@@ -121,7 +131,7 @@ export default function Play() {
 
   async function handleVote(submissionId: string) {
     try {
-      await api.post(`/social-games/${gameId}/submissions/${submissionId}/vote`)
+      await api.post(`/companies/${companyId}/social-games/${gameId}/vote`, { submission_id: submissionId, vote_value: 1 })
       setVotedIds(prev => new Set(prev).add(submissionId))
     } catch (err: any) {
       setError(err.message || 'Failed to vote')
